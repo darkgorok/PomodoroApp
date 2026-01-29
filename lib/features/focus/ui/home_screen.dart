@@ -97,34 +97,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () => _openTimer(FocusPreset.pomodoro),
                 ),
                 const SizedBox(height: 12),
-                _LockedCard(
-                  title: loc.t('customize'),
-                  subtitle: loc.t('customize_locked_subtitle'),
-                  backgroundImage: 'assets/ButtonBackgroundDarkGrey.png',
-                  backgroundScale: const Offset(1.1, 1),
-                  onTap: _openUpgrade,
-                ),
-                const SizedBox(height: 16),
-                _TipCard(
-                  title: loc.t('small_rule'),
-                  text: loc.t('small_rule_text'),
-                  backgroundImage: 'assets/ButtonBackgroundGrey.png',
-                  backgroundScale: const Offset(1.1, 1),
-                ),
+              _TipCard(
+                title: loc.t('small_rule'),
+                text: loc.t('small_rule_text'),
+                backgroundImage: 'assets/ButtonBackgroundGrey.png',
+                backgroundScale: const Offset(1.1, 1),
+              ),
+              const SizedBox(height: 12),
+              _LockedCard(
+                title: loc.t('customize'),
+                subtitle: loc.t('customize_locked_subtitle'),
+                backgroundImage: 'assets/ButtonBackgroundDarkGrey.png',
+                backgroundScale: const Offset(1.1, 1),
+                onTap: _openUpgrade,
+              ),
               ],
             );
           },
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: PrimaryButton(
-          label: AppLocalizations.of(context).t('customize_premium'),
-          onPressed: _openUpgrade,
-          isOutlined: true,
-        ),
-      ),
     );
   }
 
