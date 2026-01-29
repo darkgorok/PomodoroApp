@@ -41,50 +41,97 @@ class _TimerScreenState extends State<TimerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.preset.title),
-      ),
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          final progress = _controller.segmentSeconds == 0
-              ? 0.0
-              : _controller.remainingSeconds / _controller.segmentSeconds;
-          final statusText = _controller.isBreak ? 'Break' : 'Focus';
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF2E315B), Color(0xFF4A3E8A)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _TimerAppBar(title: widget.preset.title),
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, _) {
+                    final progress = _controller.segmentSeconds == 0
+                        ? 0.0
+                        : _controller.remainingSeconds / _controller.segmentSeconds;
+                    final statusText = _controller.isBreak ? 'Break' : 'Focus';
 
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 24),
-                ProgressRing(progress: progress),
-                const SizedBox(height: 24),
-                Text(
-                  _controller.remainingSeconds.toMinutesSeconds(),
-                  style: Theme.of(context).textTheme.displayMedium,
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            TweenAnimationBuilder<double>(
+                              tween: Tween<double>(end: progress),
+                              duration: const Duration(seconds: 1),
+                              curve: Curves.linear,
+                              builder: (context, value, child) {
+                                return ProgressRing(progress: value, size: 260);
+                              },
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  _controller.remainingSeconds.toMinutesSeconds(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 46,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Ready when you are.',
+                                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        PrimaryButton(
+                          label: _controller.isRunning ? 'End' : 'Start',
+                          onPressed:
+                              _controller.isRunning ? _endSession : _controller.start,
+                          icon: _controller.isRunning
+                              ? Icons.stop_rounded
+                              : Icons.play_arrow_rounded,
+                          height: 46,
+                        ),
+                        const Spacer(),
+                      ],
+                    );
+                  },
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  statusText,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const Spacer(),
-                PrimaryButton(
-                  label: _controller.isRunning ? 'Pause' : 'Start',
-                  onPressed:
-                      _controller.isRunning ? _controller.pause : _controller.start,
-                ),
-                const SizedBox(height: 12),
-                PrimaryButton(
-                  label: 'End Session',
-                  onPressed: _endSession,
-                  isOutlined: true,
-                ),
-              ],
-            ),
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -133,5 +180,41 @@ class _TimerScreenState extends State<TimerScreen> {
   void _endSession() {
     _controller.stop();
     Navigator.of(context).pop();
+  }
+}
+
+class _TimerAppBar extends StatelessWidget {
+  const _TimerAppBar({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
+          ),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.notifications_none, color: Colors.white70),
+          ),
+        ],
+      ),
+    );
   }
 }

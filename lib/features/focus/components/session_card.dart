@@ -6,28 +6,85 @@ class SessionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    required this.icon,
+    required this.gradient,
+    this.backgroundImage,
+    this.backgroundScale = const Offset(1, 1),
   });
 
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final IconData icon;
+  final Gradient gradient;
+  final String? backgroundImage;
+  final Offset backgroundScale;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Material(
+      color: Colors.white,
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Ink(
+          decoration: const BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x14000000),
+                blurRadius: 10,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
             children: [
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 6),
-              Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+              if (backgroundImage != null)
+                Positioned.fill(
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(
+                      backgroundScale.dx,
+                      backgroundScale.dy,
+                      1,
+                    ),
+                    child: Image.asset(
+                      backgroundImage!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: gradient,
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(title, style: Theme.of(context).textTheme.titleMedium),
+                          const SizedBox(height: 4),
+                          Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, color: Color(0xFF9AA0C8)),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
