@@ -1,13 +1,23 @@
 ﻿import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/ui/back_swipe.dart';
+import '../../focus/controller/stats_controller.dart';
+import '../../reminders/reminder_controller.dart';
 import '../locale_controller.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key, required this.localeController});
+  const SettingsScreen({
+    super.key,
+    required this.localeController,
+    required this.stats,
+    required this.reminderController,
+  });
 
   final LocaleController localeController;
+  final StatsController stats;
+  final ReminderController reminderController;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           const Icon(
-                            CupertinoIcons.chevron_down,
+                            CupertinoIcons.chevron_right,
                             size: 16,
                             color: CupertinoColors.systemGrey,
                           ),
@@ -61,6 +71,28 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              if (kDebugMode)
+                CupertinoFormSection.insetGrouped(
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.only(top: 8),
+                  children: [
+                    CupertinoFormRow(
+                      prefix: Text(loc.t('debug_premium')),
+                      child: AnimatedBuilder(
+                        animation: stats,
+                        builder: (context, _) {
+                          return CupertinoSwitch(
+                            value: stats.isPremiumCached,
+                            onChanged: (value) async {
+                              await stats.setPremiumCached(value);
+                              await reminderController.scheduleAll();
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),
@@ -87,7 +119,7 @@ class SettingsScreen extends StatelessWidget {
           cancelButton: CupertinoActionSheetAction(
             isDefaultAction: true,
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).t('cancel')),
           ),
         );
       },

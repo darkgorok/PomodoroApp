@@ -1,15 +1,25 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/localization/app_localizations.dart';
 import 'features/focus/controller/stats_controller.dart';
+import 'features/focus/controller/presets_controller.dart';
 import 'features/focus/ui/home_screen.dart';
+import 'features/reminders/reminder_controller.dart';
 import 'features/settings/locale_controller.dart';
 
 class App extends StatelessWidget {
-  const App({super.key, required this.stats, required this.localeController});
+  const App({
+    super.key,
+    required this.stats,
+    required this.localeController,
+    required this.reminderController,
+    required this.presetsController,
+  });
 
   final StatsController stats;
   final LocaleController localeController;
+  final ReminderController reminderController;
+  final PresetsController presetsController;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +92,12 @@ class App extends StatelessWidget {
               ),
             ),
           ),
-          home: HomeScreen(stats: stats, localeController: localeController),
+          home: HomeScreen(
+            stats: stats,
+            localeController: localeController,
+            reminderController: reminderController,
+            presetsController: presetsController,
+          ),
         );
       },
     );

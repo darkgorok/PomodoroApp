@@ -1,22 +1,35 @@
-import 'package:flutter/cupertino.dart';
+﻿import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../reminders/reminder_controller.dart';
+import '../../reminders/reminder_settings_screen.dart';
 import '../../settings/locale_controller.dart';
 import '../../settings/ui/settings_screen.dart';
-import '../components/primary_button.dart';
-import '../components/session_card.dart';
+import '../controller/presets_controller.dart';
 import '../controller/stats_controller.dart';
 import '../model/presets.dart';
+import '../components/preset_tile.dart';
+import '../components/session_card.dart';
 import 'paywall_screen.dart';
+import 'presets_screen.dart';
+import 'stats_screen.dart';
 import 'timer_screen.dart';
 import 'upgrade_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.stats, required this.localeController});
+  const HomeScreen({
+    super.key,
+    required this.stats,
+    required this.localeController,
+    required this.reminderController,
+    required this.presetsController,
+  });
 
   final StatsController stats;
   final LocaleController localeController;
+  final ReminderController reminderController;
+  final PresetsController presetsController;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -34,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(AppLocalizations.of(context).t('home_title')),
         actions: [
           IconButton(
-            onPressed: _openPaywall,
+            onPressed: _openReminders,
             icon: const Icon(CupertinoIcons.bell),
           ),
           IconButton(
@@ -51,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         child: AnimatedBuilder(
-          animation: widget.stats,
+          animation: Listenable.merge([widget.stats, widget.presetsController]),
           builder: (context, _) {
             final loc = AppLocalizations.of(context);
             return ListView(
@@ -59,14 +72,15 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _SummaryCard(
                   focusedMinutes: widget.stats.todayFocusedMinutes,
-                  sessionsCompleted: widget.stats.completedSessionsTotal,
+                  sessionsToday: widget.stats.sessionsToday,
+                  currentStreak: widget.stats.currentStreak,
                   title: loc.t('today_focused'),
-                  sessionsLabel: loc.t(
-                    'sessions_completed',
-                    params: {'count': widget.stats.completedSessionsTotal.toString()},
-                  ),
+                  sessionsLabel: loc.t('sessions_today'),
+                  streakLabel: loc.t('current_streak'),
+                  daysLabel: loc.t('days_short'),
                   backgroundImage: 'assets/ButtonBackgroundDarkBlue.png',
                   backgroundScale: const Offset(1.1, 1),
+                  onTap: _openStats,
                 ),
                 const SizedBox(height: 16),
                 SessionCard(
@@ -80,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   backgroundImage: 'assets/ButtonBackground.png',
                   backgroundScale: const Offset(1.1, 1),
-                  onTap: () => _openTimer(FocusPreset.startNow),
+                  onTap: () => _openTimer(_findPreset(FocusPreset.idStartNow)),
                 ),
                 const SizedBox(height: 12),
                 SessionCard(
@@ -94,23 +108,59 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   backgroundImage: 'assets/PomodoroBtnBackground.png',
                   backgroundScale: const Offset(1.1, 1),
-                  onTap: () => _openTimer(FocusPreset.pomodoro),
+                  onTap: () => _openTimer(_findPreset(FocusPreset.idPomodoro)),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      loc.t('presets'),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: _openPresets,
+                      child: Text(loc.t('see_all')),
+                    ),
+                  ],
+                ),
+                PresetTile(
+                  title: _findPreset(FocusPreset.idPomodoro).displayName(loc),
+                  subtitle: _findPreset(FocusPreset.idPomodoro).displaySubtitle(loc),
+                  locked: false,
+                  onTap: () => _openTimer(_findPreset(FocusPreset.idPomodoro)),
                 ),
                 const SizedBox(height: 12),
-              _TipCard(
-                title: loc.t('small_rule'),
-                text: loc.t('small_rule_text'),
-                backgroundImage: 'assets/ButtonBackgroundGrey.png',
-                backgroundScale: const Offset(1.1, 1),
-              ),
-              const SizedBox(height: 12),
-              _LockedCard(
-                title: loc.t('customize'),
-                subtitle: loc.t('customize_locked_subtitle'),
-                backgroundImage: 'assets/ButtonBackgroundDarkGrey.png',
-                backgroundScale: const Offset(1.1, 1),
-                onTap: _openUpgrade,
-              ),
+                PresetTile(
+                  title: _findPreset(FocusPreset.idDeepWork).displayName(loc),
+                  subtitle: _findPreset(FocusPreset.idDeepWork).displaySubtitle(loc),
+                  locked: widget.presetsController.isLocked(
+                      _findPreset(FocusPreset.idDeepWork)),
+                  onTap: () {
+                    final preset = _findPreset(FocusPreset.idDeepWork);
+                    if (widget.presetsController.isLocked(preset)) {
+                      _openPaywall();
+                    } else {
+                      _openTimer(preset);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                _TipCard(
+                  title: loc.t('small_rule'),
+                  text: loc.t('small_rule_text'),
+                  backgroundImage: 'assets/ButtonBackgroundGrey.png',
+                  backgroundScale: const Offset(1.1, 1),
+                ),
+                const SizedBox(height: 12),
+                _LockedCard(
+                  title: loc.t('customize'),
+                  subtitle: loc.t('customize_locked_subtitle'),
+                  backgroundImage: 'assets/ButtonBackgroundDarkGrey.png',
+                  backgroundScale: const Offset(1.1, 1),
+                  onTap: _openUpgrade,
+                ),
               ],
             );
           },
@@ -121,11 +171,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openTimer(FocusPreset preset) {
+    widget.presetsController.selectPreset(preset);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => TimerScreen(
           preset: preset,
           stats: widget.stats,
+          reminderController: widget.reminderController,
+          presetsController: widget.presetsController,
         ),
       ),
     );
@@ -140,7 +193,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openSettings() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => SettingsScreen(localeController: widget.localeController),
+        builder: (_) => SettingsScreen(
+          localeController: widget.localeController,
+          stats: widget.stats,
+          reminderController: widget.reminderController,
+        ),
       ),
     );
   }
@@ -149,6 +206,39 @@ class _HomeScreenState extends State<HomeScreen> {
     widget.stats.markPaywallShown();
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const PaywallScreen()),
+    );
+  }
+
+  void _openStats() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => StatsScreen(stats: widget.stats)),
+    );
+  }
+
+  void _openPresets() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PresetsScreen(
+          presetsController: widget.presetsController,
+          stats: widget.stats,
+          reminderController: widget.reminderController,
+        ),
+      ),
+    );
+  }
+
+  void _openReminders() {
+    if (!widget.stats.isPremiumCached) {
+      _openPaywall();
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ReminderSettingsScreen(
+          controller: widget.reminderController,
+          stats: widget.stats,
+        ),
+      ),
     );
   }
 
@@ -167,24 +257,37 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
+  FocusPreset _findPreset(String id) {
+    return widget.presetsController.presets
+        .firstWhere((preset) => preset.id == id);
+  }
 }
 
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard({
     required this.focusedMinutes,
-    required this.sessionsCompleted,
+    required this.sessionsToday,
+    required this.currentStreak,
     required this.title,
     required this.sessionsLabel,
+    required this.streakLabel,
+    required this.daysLabel,
     this.backgroundImage,
     this.backgroundScale = const Offset(1, 1),
+    this.onTap,
   });
 
   final int focusedMinutes;
-  final int sessionsCompleted;
+  final int sessionsToday;
+  final int currentStreak;
   final String title;
   final String sessionsLabel;
+  final String streakLabel;
+  final String daysLabel;
   final String? backgroundImage;
   final Offset backgroundScale;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -192,82 +295,101 @@ class _SummaryCard extends StatelessWidget {
       color: const Color(0xFF4B55C9),
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.hardEdge,
-      child: Ink(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF4B55C9), Color(0xFF6C6DDA)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x22000000),
-              blurRadius: 12,
-              offset: Offset(0, 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF4B55C9), Color(0xFF6C6DDA)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ],
-        ),
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            if (backgroundImage != null)
-              Positioned.fill(
-                child: Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.diagonal3Values(
-                    backgroundScale.dx,
-                    backgroundScale.dy,
-                    1,
-                  ),
-                  child: Image.asset(
-                    backgroundImage!,
-                    fit: BoxFit.cover,
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x22000000),
+                blurRadius: 12,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              if (backgroundImage != null)
+                Positioned.fill(
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(
+                      backgroundScale.dx,
+                      backgroundScale.dy,
+                      1,
+                    ),
+                    child: Image.asset(
+                      backgroundImage!,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '$focusedMinutes ${AppLocalizations.of(context).t('minutes_short')}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
+                        const SizedBox(width: 8),
+                        Text(
+                          '$focusedMinutes ${AppLocalizations.of(context).t('minutes_short')}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    height: 1,
-                    width: 320,
-                    color: Colors.white24,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    sessionsLabel,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 1,
+                      width: 220,
+                      color: Colors.white24,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$sessionsLabel: $sessionsToday',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          '🔥 $streakLabel: $currentStreak $daysLabel',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

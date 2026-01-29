@@ -14,6 +14,9 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.2.3
+  just_audio: ^0.9.38
+  flutter_local_notifications: ^17.2.2
+  timezone: ^0.9.4
   flutter_localizations:
     sdk: flutter
 
@@ -32,6 +35,11 @@ flutter:
     - assets/ButtonBackgroundDarkGrey.png
     - assets/AppBackground.png
     - assets/AppBackgroundDark.png
+    - assets/sounds/rain.mp3
+    - assets/sounds/ocean.mp3
+    - assets/sounds/forest.mp3
+    - assets/sounds/fire.mp3
+    - assets/sounds/white.mp3
   fonts:
     - family: NotoSans
       fonts:

@@ -4,35 +4,73 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../model/presets.dart';
-import '../model/session_state.dart';
 import 'stats_controller.dart';
 
 class TimerController extends ChangeNotifier {
   TimerController({
-    required this.preset,
+    required FocusPreset preset,
     required this.stats,
     this.onSessionComplete,
-  })  : remainingSeconds = preset.focusSeconds,
+    this.onFocusStart,
+    this.onFocusEnd,
+    this.onBreakStart,
+  })  : preset = preset,
+        remainingSeconds = preset.focusSeconds,
+        _focusSeconds = preset.focusSeconds,
+        _breakSeconds = preset.breakSeconds,
         isBreak = false,
         isRunning = false;
 
-  final FocusPreset preset;
+  FocusPreset preset;
   final StatsController stats;
   final VoidCallback? onSessionComplete;
+  final VoidCallback? onFocusStart;
+  final VoidCallback? onFocusEnd;
+  final VoidCallback? onBreakStart;
 
   int remainingSeconds;
   bool isRunning;
   bool isBreak;
   Timer? _timer;
 
-  SessionMode get mode => preset.mode;
-  int get focusSeconds => preset.focusSeconds;
-  int get breakSeconds => preset.breakSeconds;
+  int get focusSeconds => _focusSeconds;
+  int get breakSeconds => _breakSeconds;
   int get segmentSeconds => isBreak ? breakSeconds : focusSeconds;
+
+  int _focusSeconds;
+  int _breakSeconds;
+
+  void updateDurations({required int focusSeconds, required int breakSeconds}) {
+    _focusSeconds = focusSeconds;
+    _breakSeconds = breakSeconds;
+    if (!isRunning) {
+      isBreak = false;
+      remainingSeconds = _focusSeconds;
+    }
+    notifyListeners();
+  }
+
+  void applyPreset(FocusPreset next) {
+    final wasRunning = isRunning;
+    _timer?.cancel();
+    preset = next;
+    _focusSeconds = next.focusSeconds;
+    _breakSeconds = next.breakSeconds;
+    isRunning = false;
+    isBreak = false;
+    remainingSeconds = _focusSeconds;
+    if (wasRunning) {
+      onFocusEnd?.call();
+    }
+    notifyListeners();
+  }
 
   void start() {
     if (isRunning) return;
     _startTimer();
+    if (!isBreak) {
+      onFocusStart?.call();
+    }
   }
 
   void pause() {
@@ -47,6 +85,7 @@ class TimerController extends ChangeNotifier {
     isRunning = false;
     isBreak = false;
     remainingSeconds = focusSeconds;
+    onFocusEnd?.call();
     notifyListeners();
   }
 
@@ -57,6 +96,7 @@ class TimerController extends ChangeNotifier {
     isRunning = false;
     notifyListeners();
     _startTimer();
+    onFocusStart?.call();
   }
 
   void _startTimer() {
@@ -82,16 +122,18 @@ class TimerController extends ChangeNotifier {
     HapticFeedback.mediumImpact();
 
     if (!isBreak) {
-      stats.addFocusSeconds(focusSeconds);
-      if (mode == SessionMode.pomodoro && breakSeconds > 0) {
+      stats.addFocusSession(focusSeconds);
+      if (breakSeconds > 0 && preset.autoStartBreak) {
         isBreak = true;
         remainingSeconds = breakSeconds;
         notifyListeners();
+        onBreakStart?.call();
         _startTimer();
         return;
       }
     }
 
+    onFocusEnd?.call();
     onSessionComplete?.call();
     notifyListeners();
   }
