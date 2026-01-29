@@ -7,6 +7,7 @@ import 'features/focus/data/presets_repository.dart';
 import 'features/reminders/reminder_controller.dart';
 import 'features/reminders/reminder_repository.dart';
 import 'features/settings/locale_controller.dart';
+import 'features/settings/theme_controller.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<void> main() async {
@@ -18,6 +19,9 @@ Future<void> main() async {
 
   final localeController = LocaleController();
   await localeController.init();
+
+  final themeController = ThemeController();
+  await themeController.init();
 
   final presetsRepo = PresetsRepository();
   final presetsController = PresetsController(repo: presetsRepo, stats: stats);
@@ -42,5 +46,6 @@ Future<void> main() async {
     localeController: localeController,
     reminderController: reminderController,
     presetsController: presetsController,
+    themeController: themeController,
   ));
 }

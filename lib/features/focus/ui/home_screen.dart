@@ -1,4 +1,4 @@
-﻿import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
@@ -6,11 +6,13 @@ import '../../reminders/reminder_controller.dart';
 import '../../reminders/reminder_settings_screen.dart';
 import '../../settings/locale_controller.dart';
 import '../../settings/ui/settings_screen.dart';
+import '../../settings/theme_controller.dart';
 import '../controller/presets_controller.dart';
 import '../controller/stats_controller.dart';
 import '../model/presets.dart';
 import '../components/preset_tile.dart';
 import '../components/session_card.dart';
+import '../../../core/ui/app_background.dart';
 import 'paywall_screen.dart';
 import 'presets_screen.dart';
 import 'stats_screen.dart';
@@ -24,12 +26,14 @@ class HomeScreen extends StatefulWidget {
     required this.localeController,
     required this.reminderController,
     required this.presetsController,
+    required this.themeController,
   });
 
   final StatsController stats;
   final LocaleController localeController;
   final ReminderController reminderController;
   final PresetsController presetsController;
+  final ThemeController themeController;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -43,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowPaywall());
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).t('home_title')),
         actions: [
@@ -56,20 +61,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/AppBackground.png'),
-            fit: BoxFit.cover,
+      body: SafeArea(
+        bottom: false,
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(appBackgroundAsset(context)),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: AnimatedBuilder(
-          animation: Listenable.merge([widget.stats, widget.presetsController]),
-          builder: (context, _) {
-            final loc = AppLocalizations.of(context);
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              children: [
+          child: AnimatedBuilder(
+            animation: Listenable.merge([widget.stats, widget.presetsController]),
+            builder: (context, _) {
+              final loc = AppLocalizations.of(context);
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                children: [
                 _SummaryCard(
                   focusedMinutes: widget.stats.todayFocusedMinutes,
                   sessionsToday: widget.stats.sessionsToday,
@@ -179,8 +186,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: _openUpgrade,
                 ),
               ],
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -214,6 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
           localeController: widget.localeController,
           stats: widget.stats,
           reminderController: widget.reminderController,
+          themeController: widget.themeController,
         ),
       ),
     );
@@ -395,7 +404,7 @@ class _SummaryCard extends StatelessWidget {
                         if (currentStreak > 0) ...[
                           const SizedBox(width: 10),
                           Text(
-                            '🔥 $streakLabel: $currentStreak $daysLabel',
+                            '?? $streakLabel: $currentStreak $daysLabel',
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
@@ -575,9 +584,22 @@ class _TipCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: Theme.of(context).textTheme.titleMedium),
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1E2138),
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text(text, style: Theme.of(context).textTheme.bodyMedium),
+                        Text(
+                          text,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF6B6F8C),
+                          ),
+                        ),
                       ],
                     ),
                   ),

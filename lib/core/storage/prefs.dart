@@ -17,6 +17,7 @@ class Prefs {
   static const String _selectedSoundIdKey = 'selected_sound_id';
   static const String _soundVolumeKey = 'sound_volume';
   static const String _autoPlayEnabledKey = 'auto_play_enabled';
+  static const String _themeModeKey = 'theme_mode';
 
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -148,5 +149,11 @@ class Prefs {
 
   static Future<void> setAutoPlayEnabled(bool value) async {
     await _prefs.setBool(_autoPlayEnabledKey, value);
+  }
+
+  static String? getThemeMode() => _prefs.getString(_themeModeKey);
+
+  static Future<void> setThemeMode(String value) async {
+    await _prefs.setString(_themeModeKey, value);
   }
 }

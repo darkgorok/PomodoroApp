@@ -46,12 +46,19 @@ class PresetTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E2138),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF6B6F8C),
+                        ),
                       ),
                     ],
                   ),

@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/ui/back_swipe.dart';
+import '../../../core/ui/app_background.dart';
 import '../../focus/controller/stats_controller.dart';
 import '../../reminders/reminder_controller.dart';
 import '../locale_controller.dart';
+import '../theme_controller.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
@@ -13,31 +15,36 @@ class SettingsScreen extends StatelessWidget {
     required this.localeController,
     required this.stats,
     required this.reminderController,
+    required this.themeController,
   });
 
   final LocaleController localeController;
   final StatsController stats;
   final ReminderController reminderController;
+  final ThemeController themeController;
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(loc.t('settings')),
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/AppBackground.png'),
-              fit: BoxFit.cover,
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(appBackgroundAsset(context)),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            children: [
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              children: [
               _SettingsCard(
                 child: _SettingsRow(
                   title: loc.t('language'),
@@ -45,6 +52,14 @@ class SettingsScreen extends StatelessWidget {
                     localeController.locale?.languageCode ?? 'en',
                   ),
                   onTap: () => _showLanguageSheet(context),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _SettingsCard(
+                child: _SettingsThemeRow(
+                  title: loc.t('theme'),
+                  mode: themeController.mode,
+                  onChanged: themeController.setMode,
                 ),
               ),
               if (kDebugMode) ...[
@@ -65,7 +80,8 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -157,9 +173,16 @@ class _SettingsRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            Expanded(
-              child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E2138),
+              ),
             ),
+          ),
             Text(
               value,
               style: const TextStyle(
@@ -199,9 +222,80 @@ class _SettingsSwitchRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E2138),
+              ),
+            ),
           ),
           CupertinoSwitch(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsThemeRow extends StatelessWidget {
+  const _SettingsThemeRow({
+    required this.title,
+    required this.mode,
+    required this.onChanged,
+  });
+
+  final String title;
+  final ThemeMode mode;
+  final ValueChanged<ThemeMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E2138),
+              ),
+            ),
+          ),
+          CupertinoSlidingSegmentedControl<ThemeMode>(
+            groupValue: mode == ThemeMode.system ? ThemeMode.light : mode,
+            onValueChanged: (value) {
+              if (value != null) onChanged(value);
+            },
+            backgroundColor: const Color(0xFFE6E8F4),
+            thumbColor: Colors.white,
+            children: {
+              ThemeMode.light: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: Text(
+                  loc.t('theme_light'),
+                  style: const TextStyle(
+                    color: Color(0xFF1E2138),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              ThemeMode.dark: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: Text(
+                  loc.t('theme_dark'),
+                  style: const TextStyle(
+                    color: Color(0xFF1E2138),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            },
+          ),
         ],
       ),
     );

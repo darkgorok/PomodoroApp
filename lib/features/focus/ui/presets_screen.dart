@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/ui/back_swipe.dart';
+import '../../../core/ui/app_background.dart';
 import '../components/preset_tile.dart';
 import '../controller/presets_controller.dart';
 import '../controller/stats_controller.dart';
@@ -28,32 +29,35 @@ class PresetsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(loc.t('presets')),
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/AppBackground.png'),
-              fit: BoxFit.cover,
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(appBackgroundAsset(context)),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: AnimatedBuilder(
-            animation: Listenable.merge([presetsController, stats]),
-            builder: (context, _) {
-              final allPresets = presetsController.presets;
-              final free = allPresets
-                  .where((p) => !p.isPremium)
-                  .toList(growable: false);
-              final premium = allPresets
-                  .where((p) => p.isPremium)
-                  .toList(growable: false);
+            child: AnimatedBuilder(
+              animation: Listenable.merge([presetsController, stats]),
+              builder: (context, _) {
+                final allPresets = presetsController.presets;
+                final free = allPresets
+                    .where((p) => !p.isPremium)
+                    .toList(growable: false);
+                final premium = allPresets
+                    .where((p) => p.isPremium)
+                    .toList(growable: false);
 
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  children: [
                   _SectionLabel(title: loc.t('free')),
                   ...free.map((preset) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -93,9 +97,10 @@ class PresetsScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     child: Text(loc.t('create_preset')),
                   ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

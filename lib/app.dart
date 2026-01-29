@@ -6,6 +6,7 @@ import 'features/focus/controller/presets_controller.dart';
 import 'features/focus/ui/home_screen.dart';
 import 'features/reminders/reminder_controller.dart';
 import 'features/settings/locale_controller.dart';
+import 'features/settings/theme_controller.dart';
 
 class App extends StatelessWidget {
   const App({
@@ -14,12 +15,14 @@ class App extends StatelessWidget {
     required this.localeController,
     required this.reminderController,
     required this.presetsController,
+    required this.themeController,
   });
 
   final StatsController stats;
   final LocaleController localeController;
   final ReminderController reminderController;
   final PresetsController presetsController;
+  final ThemeController themeController;
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +35,16 @@ class App extends StatelessWidget {
       fontFamily: fontFamily,
     );
 
+    final darkBase = ThemeData(
+      useMaterial3: false,
+      brightness: Brightness.dark,
+      platform: TargetPlatform.iOS,
+      typography: Typography.material2018(platform: TargetPlatform.iOS),
+      fontFamily: fontFamily,
+    );
+
     return AnimatedBuilder(
-      animation: localeController,
+      animation: Listenable.merge([localeController, themeController]),
       builder: (context, _) {
         return MaterialApp(
           title: 'Focus Timer',
@@ -45,6 +56,7 @@ class App extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
+          themeMode: themeController.mode,
           theme: base.copyWith(
             colorScheme: base.colorScheme.copyWith(
               primary: const Color(0xFF4B55C9),
@@ -53,10 +65,30 @@ class App extends StatelessWidget {
               onSurface: const Color(0xFF1E2138),
             ),
             scaffoldBackgroundColor: const Color(0xFFF3F4FA),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF4B55C9),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            filledButtonTheme: FilledButtonThemeData(
+              style: FilledButton.styleFrom(
+                foregroundColor: Colors.white,
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF4B55C9),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
             appBarTheme: AppBarTheme(
               centerTitle: true,
               backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
               elevation: 0,
+              scrolledUnderElevation: 0,
               toolbarHeight: 44,
               titleTextStyle: TextStyle(
                 fontSize: 18,
@@ -92,11 +124,79 @@ class App extends StatelessWidget {
               ),
             ),
           ),
+          darkTheme: darkBase.copyWith(
+            colorScheme: darkBase.colorScheme.copyWith(
+              primary: const Color(0xFF4B55C9),
+              secondary: const Color(0xFF9A7BFF),
+              surface: const Color(0xFF1A1B2E),
+              onSurface: const Color(0xFFF2F3FF),
+            ),
+            scaffoldBackgroundColor: const Color(0xFF111221),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF4B55C9),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            filledButtonTheme: FilledButtonThemeData(
+              style: FilledButton.styleFrom(
+                foregroundColor: Colors.white,
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF4B55C9),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            appBarTheme: AppBarTheme(
+              centerTitle: true,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              toolbarHeight: 44,
+              titleTextStyle: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontFamily: fontFamily,
+              ),
+              iconTheme: const IconThemeData(color: Colors.white),
+            ),
+            textTheme: darkBase.textTheme.copyWith(
+              headlineMedium: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+              titleLarge: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+              titleMedium: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+              bodyLarge: const TextStyle(
+                fontSize: 15,
+                color: Color(0xFFE0E1F5),
+              ),
+              bodyMedium: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFFB8B9D9),
+              ),
+            ),
+          ),
           home: HomeScreen(
             stats: stats,
             localeController: localeController,
             reminderController: reminderController,
             presetsController: presetsController,
+            themeController: themeController,
           ),
         );
       },

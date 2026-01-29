@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/localization/app_localizations.dart';
 import '../../core/ui/back_swipe.dart';
+import '../../core/ui/app_background.dart';
 import '../focus/controller/stats_controller.dart';
 import '../focus/ui/paywall_screen.dart';
 import 'reminder_controller.dart';
@@ -22,24 +23,27 @@ class ReminderSettingsScreen extends StatelessWidget {
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(loc.t('reminders')),
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/AppBackground.png'),
-              fit: BoxFit.cover,
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(appBackgroundAsset(context)),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: AnimatedBuilder(
-            animation: Listenable.merge([controller, stats]),
-            builder: (context, _) {
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                children: [
+            child: AnimatedBuilder(
+              animation: Listenable.merge([controller, stats]),
+              builder: (context, _) {
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  children: [
                   _SectionTitle(title: loc.t('daily_reminder')),
                   _ToggleRow(
                     title: loc.t('daily_reminder'),
@@ -147,9 +151,10 @@ class ReminderSettingsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

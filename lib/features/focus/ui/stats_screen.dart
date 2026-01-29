@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/ui/app_background.dart';
 import '../../../core/ui/back_swipe.dart';
 import '../controller/stats_controller.dart';
 import '../data/stats_repository.dart';
@@ -17,24 +18,27 @@ class StatsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(loc.t('your_progress')),
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/AppBackground.png'),
-              fit: BoxFit.cover,
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(appBackgroundAsset(context)),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: AnimatedBuilder(
-            animation: stats,
-            builder: (context, _) {
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
+            child: AnimatedBuilder(
+              animation: stats,
+              builder: (context, _) {
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  children: [
                   _SectionTitle(title: loc.t('today_section')),
                   _Card(
                     child: Row(
@@ -90,9 +94,10 @@ class StatsScreen extends StatelessWidget {
                     onLockedTap: () => _openPaywall(context),
                     child: _CalendarHeatmap(data: stats.calendarStats),
                   ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

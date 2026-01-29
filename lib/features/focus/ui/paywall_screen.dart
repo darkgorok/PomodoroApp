@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/ui/back_swipe.dart';
+import '../../../core/ui/app_background.dart';
 import '../components/primary_button.dart';
 
 class PaywallScreen extends StatelessWidget {
@@ -13,14 +14,15 @@ class PaywallScreen extends StatelessWidget {
     return Scaffold(
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/AppBackground.png'),
-              fit: BoxFit.cover,
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(appBackgroundAsset(context)),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: SafeArea(
             child: Column(
               children: [
                 Align(

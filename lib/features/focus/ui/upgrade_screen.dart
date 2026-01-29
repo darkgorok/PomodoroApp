@@ -3,6 +3,7 @@
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/ui/back_swipe.dart';
 import '../components/primary_button.dart';
+import '../../../core/ui/app_background.dart';
 import 'paywall_screen.dart';
 
 class UpgradeScreen extends StatelessWidget {
@@ -11,21 +12,24 @@ class UpgradeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).t('upgrade')),
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/AppBackground.png'),
-              fit: BoxFit.cover,
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(appBackgroundAsset(context)),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -126,7 +130,8 @@ class UpgradeScreen extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
             isOutlined: true,
           ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

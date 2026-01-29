@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/ui/back_swipe.dart';
+import '../../../core/ui/app_background.dart';
 import '../controller/presets_controller.dart';
 import '../model/presets.dart';
 
@@ -54,6 +55,7 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           _isEditing ? loc.t('edit_preset') : loc.t('create_preset'),
@@ -61,16 +63,18 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/AppBackground.png'),
-              fit: BoxFit.cover,
+        child: SafeArea(
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(appBackgroundAsset(context)),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            children: [
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              children: [
               CupertinoFormSection.insetGrouped(
                 backgroundColor: Colors.transparent,
                 margin: EdgeInsets.zero,
@@ -152,7 +156,8 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
                     ),
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

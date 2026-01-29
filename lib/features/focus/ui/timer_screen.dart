@@ -1,4 +1,4 @@
-﻿import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
@@ -104,22 +104,22 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       return Column(
                         children: [
                           const SizedBox(height: 28),
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            spacing: 10,
-                            runSpacing: 8,
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              _StatusPill(text: statusText),
                               _PresetPill(
                                 label:
                                     '${AppLocalizations.of(context).t('preset')}: ${_controller.preset.displayName(AppLocalizations.of(context))}',
                                 onTap: () => _openPresetSelector(context),
                               ),
+                              const SizedBox(height: 8),
                               _SoundButton(
                                 isPremium: widget.stats.isPremiumCached,
                                 label: AppLocalizations.of(context).t('sound_button'),
                                 onTap: () => _openSoundPicker(context),
                               ),
+                              const SizedBox(height: 8),
+                              _StatusPill(text: statusText),
                             ],
                           ),
                           const SizedBox(height: 14),
@@ -156,7 +156,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 20),
                           const Spacer(),
                         ],
                       );
@@ -168,6 +168,38 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                   builder: (context, _) {
                     return Column(
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
+                          child: CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: widget.stats.isPremiumCached
+                                ? _openCustomize
+                                : () => _openUpgrade(context),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!widget.stats.isPremiumCached) ...[
+                                  const Icon(
+                                    CupertinoIcons.lock_fill,
+                                    size: 16,
+                                    color: Color(0xFFC2C4E6),
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                Text(
+                                  AppLocalizations.of(context).t('customize_timer'),
+                                  style: TextStyle(
+                                    color: widget.stats.isPremiumCached
+                                        ? const Color(0xFFF5F6FF)
+                                        : const Color(0xFFC2C4E6),
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
                           child: PrimaryButton(
@@ -186,38 +218,6 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                             fullWidth: true,
                             backgroundImage: 'assets/ButtonBackgroundDarkBlue.png',
                             backgroundScale: const Offset(1.1, 1),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                          child: CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: widget.stats.isPremiumCached
-                                ? _openCustomize
-                                : () => _openPaywall(context),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (!widget.stats.isPremiumCached) ...[
-                                  const Icon(
-                                    CupertinoIcons.lock_fill,
-                                    size: 16,
-                                    color: CupertinoColors.systemGrey,
-                                  ),
-                                  const SizedBox(width: 6),
-                                ],
-                                Text(
-                                  AppLocalizations.of(context).t('customize_timer'),
-                                  style: TextStyle(
-                                    color: widget.stats.isPremiumCached
-                                        ? CupertinoColors.activeBlue
-                                        : CupertinoColors.systemGrey,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
                         ),
                       ],
@@ -461,6 +461,12 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
     );
   }
 
+  void _openUpgrade(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const UpgradeScreen()),
+    );
+  }
+
   Future<void> _handleSessionComplete() async {
     if (_dialogVisible) return;
     _dialogVisible = true;
@@ -570,7 +576,7 @@ class _StatusPill extends StatelessWidget {
         style: const TextStyle(
           color: Colors.white70,
           fontWeight: FontWeight.w600,
-          fontSize: 22,
+          fontSize: 24,
         ),
       ),
     );
