@@ -15,6 +15,7 @@ import '../../reminders/reminder_controller.dart';
 import '../../reminders/reminder_settings_screen.dart';
 import 'edit_preset_screen.dart';
 import 'paywall_screen.dart';
+import 'upgrade_screen.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({
@@ -95,7 +96,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                     builder: (context, _) {
                       final progress = _controller.segmentSeconds == 0
                           ? 0.0
-                          : _controller.remainingSeconds / _controller.segmentSeconds;
+                          : (_controller.remainingSeconds / _controller.segmentSeconds);
                       final statusText = _controller.isBreak
                           ? AppLocalizations.of(context).t('break')
                           : AppLocalizations.of(context).t('focus');
@@ -130,7 +131,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                                 duration: const Duration(seconds: 1),
                                 curve: Curves.linear,
                                 builder: (context, value, child) {
-                                  return ProgressRing(progress: value, size: 260);
+                                  return ProgressRing(progress: value, size: 300);
                                 },
                               ),
                               Column(
@@ -163,7 +164,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                   ),
                 ),
                 AnimatedBuilder(
-                  animation: widget.stats,
+                  animation: _controller,
                   builder: (context, _) {
                     return Column(
                       children: [
@@ -395,7 +396,9 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   void _openReminders(BuildContext context) {
     if (!widget.stats.isPremiumCached) {
-      _openPaywall(context);
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const UpgradeScreen()),
+      );
       return;
     }
     Navigator.of(context).push(

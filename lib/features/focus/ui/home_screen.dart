@@ -80,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   daysLabel: loc.t('days_short'),
                   backgroundImage: 'assets/ButtonBackgroundDarkBlue.png',
                   backgroundScale: const Offset(1.1, 1),
-                  onTap: _openStats,
                 ),
                 const SizedBox(height: 16),
                 SessionCard(
@@ -110,42 +109,60 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundScale: const Offset(1.1, 1),
                   onTap: () => _openTimer(_findPreset(FocusPreset.idPomodoro)),
                 ),
-                const SizedBox(height: 18),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      loc.t('presets'),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: _openPresets,
-                      child: Text(loc.t('see_all')),
-                    ),
-                  ],
-                ),
-                PresetTile(
-                  title: _findPreset(FocusPreset.idPomodoro).displayName(loc),
-                  subtitle: _findPreset(FocusPreset.idPomodoro).displaySubtitle(loc),
-                  locked: false,
-                  onTap: () => _openTimer(_findPreset(FocusPreset.idPomodoro)),
-                ),
                 const SizedBox(height: 12),
-                PresetTile(
-                  title: _findPreset(FocusPreset.idDeepWork).displayName(loc),
-                  subtitle: _findPreset(FocusPreset.idDeepWork).displaySubtitle(loc),
-                  locked: widget.presetsController.isLocked(
-                      _findPreset(FocusPreset.idDeepWork)),
-                  onTap: () {
-                    final preset = _findPreset(FocusPreset.idDeepWork);
-                    if (widget.presetsController.isLocked(preset)) {
-                      _openPaywall();
-                    } else {
-                      _openTimer(preset);
-                    }
-                  },
+                SessionCard(
+                  title: loc.t('your_progress'),
+                  subtitle: loc.t('stats_streaks_subtitle'),
+                  icon: Icons.show_chart_rounded,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF5B68FF), Color(0xFF8FA0FF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  backgroundImage: 'assets/ButtonBackground.png',
+                  backgroundScale: const Offset(1.1, 1),
+                  onTap: _openStats,
                 ),
+                if (widget.stats.isPremiumCached) ...[
+                  const SizedBox(height: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        loc.t('presets'),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: _openPresets,
+                        child: Text(loc.t('see_all')),
+                      ),
+                    ],
+                  ),
+                  PresetTile(
+                    title: _findPreset(FocusPreset.idPomodoro).displayName(loc),
+                    subtitle:
+                        _findPreset(FocusPreset.idPomodoro).displaySubtitle(loc),
+                    locked: false,
+                    onTap: () => _openTimer(_findPreset(FocusPreset.idPomodoro)),
+                  ),
+                  const SizedBox(height: 12),
+                  PresetTile(
+                    title: _findPreset(FocusPreset.idDeepWork).displayName(loc),
+                    subtitle:
+                        _findPreset(FocusPreset.idDeepWork).displaySubtitle(loc),
+                    locked: widget.presetsController.isLocked(
+                        _findPreset(FocusPreset.idDeepWork)),
+                    onTap: () {
+                      final preset = _findPreset(FocusPreset.idDeepWork);
+                      if (widget.presetsController.isLocked(preset)) {
+                        _openPaywall();
+                      } else {
+                        _openTimer(preset);
+                      }
+                    },
+                  ),
+                ],
                 const SizedBox(height: 12),
                 _TipCard(
                   title: loc.t('small_rule'),
@@ -229,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openReminders() {
     if (!widget.stats.isPremiumCached) {
-      _openPaywall();
+      _openUpgrade();
       return;
     }
     Navigator.of(context).push(
@@ -375,14 +392,16 @@ class _SummaryCard extends StatelessWidget {
                             fontSize: 12,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '🔥 $streakLabel: $currentStreak $daysLabel',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
+                        if (currentStreak > 0) ...[
+                          const SizedBox(width: 10),
+                          Text(
+                            '🔥 $streakLabel: $currentStreak $daysLabel',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ],

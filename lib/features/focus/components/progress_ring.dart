@@ -33,42 +33,47 @@ class _RingPainter extends CustomPainter {
     final radius = size.width / 2;
     final bgPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 14
-      ..color = const Color(0x334B55C9);
+      ..strokeWidth = 18
+      ..color = const Color(0x66FFFFFF);
 
     canvas.drawCircle(center, radius - 8, bgPaint);
 
-    final sweep = (progress.clamp(0.0, 1.0)) * 6.28318;
+    final clamped = progress.clamp(0.0, 1.0);
+    if (clamped <= 0) {
+      return;
+    }
+    final sweep = (clamped) * 6.28318;
+    final safeSweep = sweep < 0.001 ? 0.001 : sweep;
     final gradient = SweepGradient(
       startAngle: -1.5708,
-      endAngle: -1.5708 + sweep,
-      colors: const [Color(0xFF7A7BFF), Color(0xFFB28CFF)],
+      endAngle: -1.5708 + safeSweep,
+      colors: const [Color(0xFFDDE3FF), Color(0xFFF3E8FF)],
     );
 
     final fgPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 14
+      ..strokeWidth = 18
       ..strokeCap = StrokeCap.round
       ..shader = gradient.createShader(Rect.fromCircle(center: center, radius: radius));
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - 8),
       -1.5708,
-      sweep,
+      -safeSweep,
       false,
       fgPaint,
     );
 
     final glowPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 18
-      ..color = const Color(0x224B55C9)
+      ..strokeWidth = 22
+      ..color = const Color(0x55FFFFFF)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - 8),
       -1.5708,
-      sweep,
+      -safeSweep,
       false,
       glowPaint,
     );

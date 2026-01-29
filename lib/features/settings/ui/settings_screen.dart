@@ -38,61 +38,33 @@ class SettingsScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
-              CupertinoFormSection.insetGrouped(
-                backgroundColor: Colors.transparent,
-                margin: EdgeInsets.zero,
-                children: [
-                  CupertinoFormRow(
-                    prefix: Text(loc.t('language')),
-                    child: CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => _showLanguageSheet(context),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _languageLabel(
-                              localeController.locale?.languageCode ?? 'en',
-                            ),
-                            style: const TextStyle(
-                              color: CupertinoColors.activeBlue,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Icon(
-                            CupertinoIcons.chevron_right,
-                            size: 16,
-                            color: CupertinoColors.systemGrey,
-                          ),
-                        ],
-                      ),
-                    ),
+              _SettingsCard(
+                child: _SettingsRow(
+                  title: loc.t('language'),
+                  value: _languageLabel(
+                    localeController.locale?.languageCode ?? 'en',
                   ),
-                ],
-              ),
-              if (kDebugMode)
-                CupertinoFormSection.insetGrouped(
-                  backgroundColor: Colors.transparent,
-                  margin: const EdgeInsets.only(top: 8),
-                  children: [
-                    CupertinoFormRow(
-                      prefix: Text(loc.t('debug_premium')),
-                      child: AnimatedBuilder(
-                        animation: stats,
-                        builder: (context, _) {
-                          return CupertinoSwitch(
-                            value: stats.isPremiumCached,
-                            onChanged: (value) async {
-                              await stats.setPremiumCached(value);
-                              await reminderController.scheduleAll();
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                  onTap: () => _showLanguageSheet(context),
                 ),
+              ),
+              if (kDebugMode) ...[
+                const SizedBox(height: 12),
+                _SettingsCard(
+                  child: AnimatedBuilder(
+                    animation: stats,
+                    builder: (context, _) {
+                      return _SettingsSwitchRow(
+                        title: loc.t('debug_premium'),
+                        value: stats.isPremiumCached,
+                        onChanged: (value) async {
+                          await stats.setPremiumCached(value);
+                          await reminderController.scheduleAll();
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -135,5 +107,103 @@ class SettingsScreen extends StatelessWidget {
       default:
         return 'English';
     }
+  }
+}
+
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      elevation: 0,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.hardEdge,
+      child: Ink(
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 10,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({
+    required this.title,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String title;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+            ),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Color(0xFF4B55C9),
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(
+              CupertinoIcons.chevron_right,
+              size: 16,
+              color: Color(0xFF9AA0C8),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsSwitchRow extends StatelessWidget {
+  const _SettingsSwitchRow({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String title;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+          ),
+          CupertinoSwitch(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
   }
 }

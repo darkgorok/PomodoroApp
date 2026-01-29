@@ -3,6 +3,7 @@
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/ui/back_swipe.dart';
 import '../components/primary_button.dart';
+import 'paywall_screen.dart';
 
 class UpgradeScreen extends StatelessWidget {
   const UpgradeScreen({super.key});
@@ -86,6 +87,13 @@ class UpgradeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _PerkTile(
+            icon: Icons.layers_rounded,
+            title: AppLocalizations.of(context).t('presets'),
+            subtitle: AppLocalizations.of(context).t('presets_subtitle'),
+            color: const Color(0xFF6F78E8),
+          ),
+          const SizedBox(height: 12),
+          _PerkTile(
             icon: Icons.bar_chart,
             title: AppLocalizations.of(context).t('stats_streaks'),
             subtitle: AppLocalizations.of(context).t('stats_streaks_subtitle'),
@@ -106,23 +114,11 @@ class UpgradeScreen extends StatelessWidget {
             color: const Color(0xFF8C6BFF),
           ),
           const SizedBox(height: 18),
-          _PlanCard(
-            title: AppLocalizations.of(context).t('weekly'),
-            price: AppLocalizations.of(context).t('price_weekly'),
-            badge: AppLocalizations.of(context).t('most_popular'),
-            icon: Icons.bolt,
-          ),
-          const SizedBox(height: 12),
-          _PlanCard(
-            title: AppLocalizations.of(context).t('yearly'),
-            price: AppLocalizations.of(context).t('price_yearly'),
-            badge: AppLocalizations.of(context).t('best_value'),
-            icon: Icons.stars,
-          ),
-          const SizedBox(height: 18),
           PrimaryButton(
             label: AppLocalizations.of(context).t('continue'),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PaywallScreen()),
+            ),
           ),
           const SizedBox(height: 10),
           PrimaryButton(
@@ -193,78 +189,3 @@ class _PerkTile extends StatelessWidget {
     );
   }
 }
-
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({
-    required this.title,
-    required this.price,
-    required this.badge,
-    required this.icon,
-  });
-
-  final String title;
-  final String price;
-  final String badge;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 10,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFFF0F1FE),
-            ),
-            child: Icon(icon, color: const Color(0xFF5B68FF), size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text(price, style: Theme.of(context).textTheme.bodyMedium),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF2F3FF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              badge,
-              style: const TextStyle(
-                color: Color(0xFF5B68FF),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-
-
