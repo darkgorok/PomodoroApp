@@ -8,6 +8,7 @@ class Prefs {
   static const String _completedSessionsTotalKey = 'completed_sessions_total';
   static const String _lastPaywallDateKey = 'last_paywall_date';
   static const String _isPremiumCachedKey = 'is_premium_cached';
+  static const String _languageCodeKey = 'language_code';
 
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -59,5 +60,13 @@ class Prefs {
 
   static Future<void> setIsPremiumCached(bool value) async {
     await _prefs.setBool(_isPremiumCachedKey, value);
+  }
+
+  static String? getLanguageCode() {
+    return _prefs.getString(_languageCodeKey);
+  }
+
+  static Future<void> setLanguageCode(String value) async {
+    await _prefs.setString(_languageCodeKey, value);
   }
 }

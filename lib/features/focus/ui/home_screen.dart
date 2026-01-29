@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/app_localizations.dart';
+import '../../settings/locale_controller.dart';
+import '../../settings/ui/settings_screen.dart';
 import '../components/primary_button.dart';
 import '../components/session_card.dart';
 import '../controller/stats_controller.dart';
@@ -9,9 +12,10 @@ import 'timer_screen.dart';
 import 'upgrade_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.stats});
+  const HomeScreen({super.key, required this.stats, required this.localeController});
 
   final StatsController stats;
+  final LocaleController localeController;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,28 +30,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Start Now'),
+        title: Text(AppLocalizations.of(context).t('home_title')),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: _openPaywall,
             icon: const Icon(Icons.notifications_none),
+          ),
+          IconButton(
+            onPressed: _openSettings,
+            icon: const Icon(Icons.settings_outlined),
           ),
         ],
       ),
       body: AnimatedBuilder(
         animation: widget.stats,
         builder: (context, _) {
+          final loc = AppLocalizations.of(context);
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
               _SummaryCard(
                 focusedMinutes: widget.stats.todayFocusedMinutes,
                 sessionsCompleted: widget.stats.completedSessionsTotal,
+                title: loc.t('today_focused'),
+                sessionsLabel: loc.t(
+                  'sessions_completed',
+                  params: {'count': widget.stats.completedSessionsTotal.toString()},
+                ),
               ),
               const SizedBox(height: 16),
               SessionCard(
-                title: FocusPreset.startNow.title,
-                subtitle: 'Anti-procrastination',
+                title: loc.t('start_now'),
+                subtitle: loc.t('start_now_subtitle'),
                 icon: Icons.play_arrow_rounded,
                 gradient: const LinearGradient(
                   colors: [Color(0xFF5B68FF), Color(0xFF8FA0FF)],
@@ -60,8 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 12),
               SessionCard(
-                title: FocusPreset.pomodoro.title,
-                subtitle: 'Focus + break',
+                title: loc.t('pomodoro'),
+                subtitle: loc.t('pomodoro_subtitle'),
                 icon: Icons.timer_outlined,
                 gradient: const LinearGradient(
                   colors: [Color(0xFFFF8A7A), Color(0xFFFFB08A)],
@@ -74,14 +88,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 12),
               _LockedCard(
-                title: 'Customize',
-                subtitle: 'Presets & white noise',
+                title: loc.t('customize'),
+                subtitle: loc.t('customize_locked_subtitle'),
                 onTap: _openUpgrade,
               ),
               const SizedBox(height: 16),
               _TipCard(
-                title: 'Small rule',
-                text: "If you can't start, do 5 minutes. Starting is the win.",
+                title: loc.t('small_rule'),
+                text: loc.t('small_rule_text'),
               ),
             ],
           );
@@ -91,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: PrimaryButton(
-          label: 'Customize (Premium)',
+          label: AppLocalizations.of(context).t('customize_premium'),
           onPressed: _openUpgrade,
           isOutlined: true,
         ),
@@ -116,6 +130,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SettingsScreen(localeController: widget.localeController),
+      ),
+    );
+  }
+
+  void _openPaywall() {
+    widget.stats.markPaywallShown();
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const PaywallScreen()),
+    );
+  }
+
   void _maybeShowPaywall() {
     if (_paywallVisible) return;
     if (widget.stats.shouldShowPaywallAndMark()) {
@@ -137,10 +166,14 @@ class _SummaryCard extends StatelessWidget {
   const _SummaryCard({
     required this.focusedMinutes,
     required this.sessionsCompleted,
+    required this.title,
+    required this.sessionsLabel,
   });
 
   final int focusedMinutes;
   final int sessionsCompleted;
+  final String title;
+  final String sessionsLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -164,15 +197,15 @@ class _SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Today focused',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+          Text(
+            title,
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
               Text(
-                '$focusedMinutes min',
+                '$focusedMinutes ${AppLocalizations.of(context).t('minutes_short')}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
@@ -181,7 +214,7 @@ class _SummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'Sessions completed: $sessionsCompleted',
+                sessionsLabel,
                 style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],

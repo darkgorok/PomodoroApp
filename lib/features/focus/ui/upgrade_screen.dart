@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+ï»¿import 'package:flutter/material.dart';
 
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/ui/back_swipe.dart';
 import '../components/primary_button.dart';
 
 class UpgradeScreen extends StatelessWidget {
@@ -9,14 +11,13 @@ class UpgradeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upgrade'),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none)),
-        ],
+        title: Text(AppLocalizations.of(context).t('upgrade')),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        children: [
+      body: BackSwipe(
+        onBack: () => Navigator.of(context).maybePop(),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -49,19 +50,19 @@ class UpgradeScreen extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Unlock Deep Focus',
-                        style: TextStyle(
+                        AppLocalizations.of(context).t('unlock_deep_focus'),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        'Build a routine. Track progress.',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        AppLocalizations.of(context).t('upgrade_subtitle'),
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                     ],
                   ),
@@ -70,59 +71,60 @@ class UpgradeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const _PerkTile(
+          _PerkTile(
             icon: Icons.tune,
-            title: 'Custom timers',
-            subtitle: 'Set your own intervals',
-            color: Color(0xFF5B68FF),
+            title: AppLocalizations.of(context).t('custom_timers'),
+            subtitle: AppLocalizations.of(context).t('custom_timers_subtitle'),
+            color: const Color(0xFF5B68FF),
           ),
           const SizedBox(height: 12),
-          const _PerkTile(
+          _PerkTile(
             icon: Icons.bar_chart,
-            title: 'Stats & streaks',
-            subtitle: 'See your progress',
-            color: Color(0xFFFF8A7A),
+            title: AppLocalizations.of(context).t('stats_streaks'),
+            subtitle: AppLocalizations.of(context).t('stats_streaks_subtitle'),
+            color: const Color(0xFFFF8A7A),
           ),
           const SizedBox(height: 12),
-          const _PerkTile(
+          _PerkTile(
             icon: Icons.graphic_eq,
-            title: 'White noise',
-            subtitle: 'Focus with sound',
-            color: Color(0xFF58C3A5),
+            title: AppLocalizations.of(context).t('white_noise'),
+            subtitle: AppLocalizations.of(context).t('white_noise_subtitle'),
+            color: const Color(0xFF58C3A5),
           ),
           const SizedBox(height: 12),
-          const _PerkTile(
+          _PerkTile(
             icon: Icons.notifications_active,
-            title: 'Smart reminders',
-            subtitle: 'Stay on track',
-            color: Color(0xFF8C6BFF),
+            title: AppLocalizations.of(context).t('smart_reminders'),
+            subtitle: AppLocalizations.of(context).t('smart_reminders_subtitle'),
+            color: const Color(0xFF8C6BFF),
           ),
           const SizedBox(height: 18),
-          const _PlanCard(
-            title: 'Weekly',
-            price: '€2.99 / week',
-            badge: 'Most popular',
+          _PlanCard(
+            title: AppLocalizations.of(context).t('weekly'),
+            price: AppLocalizations.of(context).t('price_weekly'),
+            badge: AppLocalizations.of(context).t('most_popular'),
             icon: Icons.bolt,
           ),
           const SizedBox(height: 12),
-          const _PlanCard(
-            title: 'Yearly',
-            price: '€29.99 / year',
-            badge: 'Best value',
+          _PlanCard(
+            title: AppLocalizations.of(context).t('yearly'),
+            price: AppLocalizations.of(context).t('price_yearly'),
+            badge: AppLocalizations.of(context).t('best_value'),
             icon: Icons.stars,
           ),
           const SizedBox(height: 18),
           PrimaryButton(
-            label: 'Continue',
+            label: AppLocalizations.of(context).t('continue'),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(height: 10),
           PrimaryButton(
-            label: 'Not now',
+            label: AppLocalizations.of(context).t('not_now'),
             onPressed: () => Navigator.of(context).pop(),
             isOutlined: true,
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -254,3 +256,7 @@ class _PlanCard extends StatelessWidget {
     );
   }
 }
+
+
+
+

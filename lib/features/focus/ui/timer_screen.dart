@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/time/duration_ext.dart';
+import '../../../core/ui/back_swipe.dart';
 import '../components/primary_button.dart';
 import '../components/progress_ring.dart';
 import '../controller/stats_controller.dart';
 import '../controller/timer_controller.dart';
 import '../model/presets.dart';
+import '../model/session_state.dart';
 import 'paywall_screen.dart';
 
 class TimerScreen extends StatefulWidget {
@@ -41,95 +44,106 @@ class _TimerScreenState extends State<TimerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF2E315B), Color(0xFF4A3E8A)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      body: BackSwipe(
+        onBack: () => Navigator.of(context).maybePop(),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF2E315B), Color(0xFF4A3E8A)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _TimerAppBar(title: widget.preset.title),
-              Expanded(
-                child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, _) {
-                    final progress = _controller.segmentSeconds == 0
-                        ? 0.0
-                        : _controller.remainingSeconds / _controller.segmentSeconds;
-                    final statusText = _controller.isBreak ? 'Break' : 'Focus';
+          child: SafeArea(
+            child: Column(
+              children: [
+                _TimerAppBar(title: _titleForPreset(context)),
+                Expanded(
+                  child: AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, _) {
+                      final progress = _controller.segmentSeconds == 0
+                          ? 0.0
+                          : _controller.remainingSeconds / _controller.segmentSeconds;
+                      final statusText = _controller.isBreak
+                          ? AppLocalizations.of(context).t('break')
+                          : AppLocalizations.of(context).t('focus');
 
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            statusText,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w600,
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              statusText,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 14),
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            TweenAnimationBuilder<double>(
-                              tween: Tween<double>(end: progress),
-                              duration: const Duration(seconds: 1),
-                              curve: Curves.linear,
-                              builder: (context, value, child) {
-                                return ProgressRing(progress: value, size: 260);
-                              },
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  _controller.remainingSeconds.toMinutesSeconds(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 46,
-                                    fontWeight: FontWeight.w700,
+                          const SizedBox(height: 14),
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              TweenAnimationBuilder<double>(
+                                tween: Tween<double>(end: progress),
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.linear,
+                                builder: (context, value, child) {
+                                  return ProgressRing(progress: value, size: 260);
+                                },
+                              ),
+                              Column(
+                                children: [
+                                  Text(
+                                    _controller.remainingSeconds.toMinutesSeconds(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 46,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                const Text(
-                                  'Ready when you are.',
-                                  style: TextStyle(color: Colors.white70, fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        PrimaryButton(
-                          label: _controller.isRunning ? 'End' : 'Start',
-                          onPressed:
-                              _controller.isRunning ? _endSession : _controller.start,
-                          icon: _controller.isRunning
-                              ? Icons.stop_rounded
-                              : Icons.play_arrow_rounded,
-                          height: 46,
-                        ),
-                        const Spacer(),
-                      ],
-                    );
-                  },
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    AppLocalizations.of(context).t('ready_when'),
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          PrimaryButton(
+                            label: _controller.isRunning
+                                ? AppLocalizations.of(context).t('end')
+                                : AppLocalizations.of(context).t('start'),
+                            onPressed: _controller.isRunning
+                                ? _endSession
+                                : _controller.start,
+                            icon: _controller.isRunning
+                                ? Icons.stop_rounded
+                                : Icons.play_arrow_rounded,
+                            height: 46,
+                          ),
+                          const Spacer(),
+                        ],
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -151,15 +165,15 @@ class _TimerScreenState extends State<TimerScreen> {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Nice. Want to go again?'),
+          title: Text(AppLocalizations.of(context).t('nice_again')),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Back Home'),
+              child: Text(AppLocalizations.of(context).t('back_home')),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Start Again'),
+              child: Text(AppLocalizations.of(context).t('start_again')),
             ),
           ],
         );
@@ -180,6 +194,13 @@ class _TimerScreenState extends State<TimerScreen> {
   void _endSession() {
     _controller.stop();
     Navigator.of(context).pop();
+  }
+
+  String _titleForPreset(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return widget.preset.mode == SessionMode.pomodoro
+        ? loc.t('pomodoro')
+        : loc.t('start_now');
   }
 }
 
@@ -209,10 +230,7 @@ class _TimerAppBar extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none, color: Colors.white70),
-          ),
+          const SizedBox(width: 40),
         ],
       ),
     );
