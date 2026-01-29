@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/time/duration_ext.dart';
@@ -80,14 +81,14 @@ class _TimerScreenState extends State<TimerScreen> {
                               color: Colors.white.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                          child: Text(
-                            statusText,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 22,
+                            child: Text(
+                              statusText,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 22,
+                              ),
                             ),
-                          ),
                           ),
                           const SizedBox(height: 14),
                           Stack(
@@ -228,7 +229,7 @@ class _TimerAppBar extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
+            icon: const Icon(CupertinoIcons.back, color: Colors.white70),
           ),
           Expanded(
             child: Text(

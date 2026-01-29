@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
@@ -34,11 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: _openPaywall,
-            icon: const Icon(Icons.notifications_none),
+            icon: const Icon(CupertinoIcons.bell),
           ),
           IconButton(
             onPressed: _openSettings,
-            icon: const Icon(Icons.settings_outlined),
+            icon: const Icon(CupertinoIcons.settings),
           ),
         ],
       ),

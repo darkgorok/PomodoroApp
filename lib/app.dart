@@ -15,8 +15,10 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     const fontFamily = 'NotoSans';
     final base = ThemeData(
-      useMaterial3: true,
+      useMaterial3: false,
       brightness: Brightness.light,
+      platform: TargetPlatform.iOS,
+      typography: Typography.material2018(platform: TargetPlatform.iOS),
       fontFamily: fontFamily,
     );
 
@@ -45,6 +47,7 @@ class App extends StatelessWidget {
               centerTitle: true,
               backgroundColor: Colors.transparent,
               elevation: 0,
+              toolbarHeight: 44,
               titleTextStyle: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
