@@ -17,36 +17,44 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Text(
-              loc.t('language'),
-              style: Theme.of(context).textTheme.titleMedium,
+        child: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/AppBackground.png'),
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: localeController.locale?.languageCode,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          ),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
+                loc.t('language'),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              items: AppLocalizations.supportedLocales.map((locale) {
-                final code = locale.languageCode;
-                return DropdownMenuItem<String>(
-                  value: code,
-                  child: Text(_languageLabel(code)),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value == null) return;
-                localeController.setLocale(Locale(value));
-              },
-            ),
-          ],
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: localeController.locale?.languageCode,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items: AppLocalizations.supportedLocales.map((locale) {
+                  final code = locale.languageCode;
+                  return DropdownMenuItem<String>(
+                    value: code,
+                    child: Text(_languageLabel(code)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value == null) return;
+                  localeController.setLocale(Locale(value));
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

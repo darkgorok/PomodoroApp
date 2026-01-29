@@ -15,10 +15,9 @@ class PaywallScreen extends StatelessWidget {
         onBack: () => Navigator.of(context).maybePop(),
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF3A3F77), Color(0xFF6A56C8)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+            image: DecorationImage(
+              image: AssetImage('assets/AppBackground.png'),
+              fit: BoxFit.cover,
             ),
           ),
           child: SafeArea(

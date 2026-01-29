@@ -15,9 +15,16 @@ class UpgradeScreen extends StatelessWidget {
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          children: [
+        child: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/AppBackground.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -123,7 +130,8 @@ class UpgradeScreen extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
             isOutlined: true,
           ),
-          ],
+            ],
+          ),
         ),
       ),
     );

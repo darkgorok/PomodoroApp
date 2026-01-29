@@ -42,64 +42,78 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: AnimatedBuilder(
-        animation: widget.stats,
-        builder: (context, _) {
-          final loc = AppLocalizations.of(context);
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
-              _SummaryCard(
-                focusedMinutes: widget.stats.todayFocusedMinutes,
-                sessionsCompleted: widget.stats.completedSessionsTotal,
-                title: loc.t('today_focused'),
-                sessionsLabel: loc.t(
-                  'sessions_completed',
-                  params: {'count': widget.stats.completedSessionsTotal.toString()},
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/AppBackground.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: AnimatedBuilder(
+          animation: widget.stats,
+          builder: (context, _) {
+            final loc = AppLocalizations.of(context);
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              children: [
+                _SummaryCard(
+                  focusedMinutes: widget.stats.todayFocusedMinutes,
+                  sessionsCompleted: widget.stats.completedSessionsTotal,
+                  title: loc.t('today_focused'),
+                  sessionsLabel: loc.t(
+                    'sessions_completed',
+                    params: {'count': widget.stats.completedSessionsTotal.toString()},
+                  ),
+                  backgroundImage: 'assets/ButtonBackgroundDarkBlue.png',
+                  backgroundScale: const Offset(1.1, 1),
                 ),
-              ),
-              const SizedBox(height: 16),
-              SessionCard(
-                title: loc.t('start_now'),
-                subtitle: loc.t('start_now_subtitle'),
-                icon: Icons.play_arrow_rounded,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF5B68FF), Color(0xFF8FA0FF)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                const SizedBox(height: 16),
+                SessionCard(
+                  title: loc.t('start_now'),
+                  subtitle: loc.t('start_now_subtitle'),
+                  icon: Icons.play_arrow_rounded,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF5B68FF), Color(0xFF8FA0FF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  backgroundImage: 'assets/ButtonBackground.png',
+                  backgroundScale: const Offset(1.1, 1),
+                  onTap: () => _openTimer(FocusPreset.startNow),
                 ),
-                backgroundImage: 'assets/ButtonBackground.png',
-                backgroundScale: const Offset(1.1, 1),
-                onTap: () => _openTimer(FocusPreset.startNow),
-              ),
-              const SizedBox(height: 12),
-              SessionCard(
-                title: loc.t('pomodoro'),
-                subtitle: loc.t('pomodoro_subtitle'),
-                icon: Icons.timer_outlined,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF8A7A), Color(0xFFFFB08A)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                const SizedBox(height: 12),
+                SessionCard(
+                  title: loc.t('pomodoro'),
+                  subtitle: loc.t('pomodoro_subtitle'),
+                  icon: Icons.timer_outlined,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF8A7A), Color(0xFFFFB08A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  backgroundImage: 'assets/PomodoroBtnBackground.png',
+                  backgroundScale: const Offset(1.1, 1),
+                  onTap: () => _openTimer(FocusPreset.pomodoro),
                 ),
-                backgroundImage: 'assets/PomodoroBtnBackground.png',
-                backgroundScale: const Offset(1.1, 1),
-                onTap: () => _openTimer(FocusPreset.pomodoro),
-              ),
-              const SizedBox(height: 12),
-              _LockedCard(
-                title: loc.t('customize'),
-                subtitle: loc.t('customize_locked_subtitle'),
-                onTap: _openUpgrade,
-              ),
-              const SizedBox(height: 16),
-              _TipCard(
-                title: loc.t('small_rule'),
-                text: loc.t('small_rule_text'),
-              ),
-            ],
-          );
-        },
+                const SizedBox(height: 12),
+                _LockedCard(
+                  title: loc.t('customize'),
+                  subtitle: loc.t('customize_locked_subtitle'),
+                  backgroundImage: 'assets/ButtonBackgroundDarkGrey.png',
+                  backgroundScale: const Offset(1.1, 1),
+                  onTap: _openUpgrade,
+                ),
+                const SizedBox(height: 16),
+                _TipCard(
+                  title: loc.t('small_rule'),
+                  text: loc.t('small_rule_text'),
+                  backgroundImage: 'assets/ButtonBackgroundGrey.png',
+                  backgroundScale: const Offset(1.1, 1),
+                ),
+              ],
+            );
+          },
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
@@ -168,58 +182,100 @@ class _SummaryCard extends StatelessWidget {
     required this.sessionsCompleted,
     required this.title,
     required this.sessionsLabel,
+    this.backgroundImage,
+    this.backgroundScale = const Offset(1, 1),
   });
 
   final int focusedMinutes;
   final int sessionsCompleted;
   final String title;
   final String sessionsLabel;
+  final String? backgroundImage;
+  final Offset backgroundScale;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4B55C9), Color(0xFF6C6DDA)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Material(
+      color: const Color(0xFF4B55C9),
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.hardEdge,
+      child: Ink(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF4B55C9), Color(0xFF6C6DDA)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x22000000),
+              blurRadius: 12,
+              offset: Offset(0, 8),
+            ),
+          ],
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 12,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                '$focusedMinutes ${AppLocalizations.of(context).t('minutes_short')}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            if (backgroundImage != null)
+              Positioned.fill(
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.diagonal3Values(
+                    backgroundScale.dx,
+                    backgroundScale.dy,
+                    1,
+                  ),
+                  child: Image.asset(
+                    backgroundImage!,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Text(
-                sessionsLabel,
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$focusedMinutes ${AppLocalizations.of(context).t('minutes_short')}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    height: 1,
+                    width: 320,
+                    color: Colors.white24,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    sessionsLabel,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -230,29 +286,32 @@ class _LockedCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.backgroundImage,
+    this.backgroundScale = const Offset(1, 1),
   });
 
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final String? backgroundImage;
+  final Offset backgroundScale;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: const Color(0xFF2E2F4C),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
         child: Ink(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
               colors: [Color(0xFF2E2F4C), Color(0xFF3C3F66)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
                 color: Color(0x1A000000),
                 blurRadius: 10,
@@ -260,31 +319,55 @@ class _LockedCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
             children: [
-              const Icon(Icons.lock_outline, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              if (backgroundImage != null)
+                Positioned.fill(
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(
+                      backgroundScale.dx,
+                      backgroundScale.dy,
+                      1,
+                    ),
+                    child: Image.asset(
+                      backgroundImage!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                    const Icon(Icons.lock_outline, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            subtitle,
+                            style:
+                                const TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
+                    const Icon(Icons.chevron_right, color: Colors.white70),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.white70),
             ],
           ),
         ),
@@ -294,49 +377,81 @@ class _LockedCard extends StatelessWidget {
 }
 
 class _TipCard extends StatelessWidget {
-  const _TipCard({required this.title, required this.text});
+  const _TipCard({
+    required this.title,
+    required this.text,
+    this.backgroundImage,
+    this.backgroundScale = const Offset(1, 1),
+  });
 
   final String title;
   final String text;
+  final String? backgroundImage;
+  final Offset backgroundScale;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 10,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFFEDEEFE),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.hardEdge,
+      child: Ink(
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x12000000),
+              blurRadius: 10,
+              offset: Offset(0, 6),
             ),
-            child: const Icon(Icons.auto_awesome, color: Color(0xFF6C6DDA)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text(text, style: Theme.of(context).textTheme.bodyMedium),
-              ],
+          ],
+        ),
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            if (backgroundImage != null)
+              Positioned.fill(
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.diagonal3Values(
+                    backgroundScale.dx,
+                    backgroundScale.dy,
+                    1,
+                  ),
+                  child: Image.asset(
+                    backgroundImage!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFEDEEFE),
+                    ),
+                    child: const Icon(Icons.auto_awesome, color: Color(0xFF6C6DDA)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 4),
+                        Text(text, style: Theme.of(context).textTheme.bodyMedium),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

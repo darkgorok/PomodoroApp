@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/time/duration_ext.dart';
@@ -48,10 +48,9 @@ class _TimerScreenState extends State<TimerScreen> {
         onBack: () => Navigator.of(context).maybePop(),
         child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF2E315B), Color(0xFF4A3E8A)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+            image: DecorationImage(
+              image: AssetImage('assets/AppBackgroundDark.png'),
+              fit: BoxFit.cover,
             ),
           ),
           child: SafeArea(
@@ -70,8 +69,8 @@ class _TimerScreenState extends State<TimerScreen> {
                           : AppLocalizations.of(context).t('focus');
 
                       return Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
+                          const SizedBox(height: 28),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 18,
@@ -81,13 +80,14 @@ class _TimerScreenState extends State<TimerScreen> {
                               color: Colors.white.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(
-                              statusText,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          child: Text(
+                            statusText,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 22,
                             ),
+                          ),
                           ),
                           const SizedBox(height: 14),
                           Stack(
@@ -123,24 +123,36 @@ class _TimerScreenState extends State<TimerScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
-                          PrimaryButton(
-                            label: _controller.isRunning
-                                ? AppLocalizations.of(context).t('end')
-                                : AppLocalizations.of(context).t('start'),
-                            onPressed: _controller.isRunning
-                                ? _endSession
-                                : _controller.start,
-                            icon: _controller.isRunning
-                                ? Icons.stop_rounded
-                                : Icons.play_arrow_rounded,
-                            height: 46,
-                          ),
+                          const SizedBox(height: 32),
                           const Spacer(),
                         ],
                       );
                     },
                   ),
+                ),
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, _) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+                      child: PrimaryButton(
+                        label: _controller.isRunning
+                            ? AppLocalizations.of(context).t('end')
+                            : AppLocalizations.of(context).t('start'),
+                        onPressed:
+                            _controller.isRunning ? _endSession : _controller.start,
+                        icon: _controller.isRunning
+                            ? Icons.stop_rounded
+                            : Icons.play_arrow_rounded,
+                        height: 64,
+                        fontSize: 24,
+                        iconSize: 24,
+                        fullWidth: true,
+                        backgroundImage: 'assets/ButtonBackgroundDarkBlue.png',
+                        backgroundScale: const Offset(1.1, 1),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -193,7 +205,6 @@ class _TimerScreenState extends State<TimerScreen> {
 
   void _endSession() {
     _controller.stop();
-    Navigator.of(context).pop();
   }
 
   String _titleForPreset(BuildContext context) {

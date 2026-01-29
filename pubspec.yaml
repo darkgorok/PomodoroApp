@@ -26,6 +26,11 @@ flutter:
   assets:
     - assets/ButtonBackground.png
     - assets/PomodoroBtnBackground.png
+    - assets/ButtonBackgroundDarkBlue.png
+    - assets/ButtonBackgroundGrey.png
+    - assets/ButtonBackgroundDarkGrey.png
+    - assets/AppBackground.png
+    - assets/AppBackgroundDark.png
   fonts:
     - family: NotoSans
       fonts:
