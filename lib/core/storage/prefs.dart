@@ -18,6 +18,8 @@ class Prefs {
   static const String _soundVolumeKey = 'sound_volume';
   static const String _autoPlayEnabledKey = 'auto_play_enabled';
   static const String _themeModeKey = 'theme_mode';
+  static const String _hiddenBuiltInPresetsKey = 'hidden_built_in_presets';
+  static const String _trialUsedKey = 'trial_used';
 
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -155,5 +157,19 @@ class Prefs {
 
   static Future<void> setThemeMode(String value) async {
     await _prefs.setString(_themeModeKey, value);
+  }
+
+  static List<String> getHiddenBuiltInPresets() {
+    return _prefs.getStringList(_hiddenBuiltInPresetsKey) ?? <String>[];
+  }
+
+  static Future<void> setHiddenBuiltInPresets(List<String> value) async {
+    await _prefs.setStringList(_hiddenBuiltInPresetsKey, value);
+  }
+
+  static bool getTrialUsed() => _prefs.getBool(_trialUsedKey) ?? false;
+
+  static Future<void> setTrialUsed(bool value) async {
+    await _prefs.setBool(_trialUsedKey, value);
   }
 }

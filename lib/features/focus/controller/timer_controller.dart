@@ -123,7 +123,7 @@ class TimerController extends ChangeNotifier {
 
     if (!isBreak) {
       stats.addFocusSession(focusSeconds);
-      if (breakSeconds > 0 && preset.autoStartBreak) {
+      if (breakSeconds > 0) {
         isBreak = true;
         remainingSeconds = breakSeconds;
         notifyListeners();

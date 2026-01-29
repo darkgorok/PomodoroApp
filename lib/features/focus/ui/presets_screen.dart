@@ -65,6 +65,7 @@ class PresetsScreen extends StatelessWidget {
                           title: preset.displayName(loc),
                           subtitle: preset.displaySubtitle(loc),
                           locked: false,
+                          icon: Icons.star_rounded,
                           onTap: () => _openPreset(context, preset),
                         ),
                       )),
@@ -72,18 +73,31 @@ class PresetsScreen extends StatelessWidget {
                   _SectionLabel(title: loc.t('premium')),
                   ...premium.map((preset) {
                     final locked = presetsController.isLocked(preset);
+                    final tile = PresetTile(
+                      title: preset.displayName(loc),
+                      subtitle: preset.displaySubtitle(loc),
+                      locked: locked,
+                      onTap: () => locked
+                          ? _openPaywall(context)
+                          : _openPreset(context, preset),
+                    );
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: PresetTile(
-                        title: preset.displayName(loc),
-                        subtitle: preset.displaySubtitle(loc),
-                        locked: locked,
-                        onTap: () => locked
-                            ? _openPaywall(context)
-                            : _openPreset(context, preset),
-                        onLongPress: (!locked && !preset.isBuiltIn)
-                            ? () => _openEditPreset(context, preset)
-                            : null,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final constrained = ConstrainedBox(
+                            constraints:
+                                BoxConstraints(maxWidth: constraints.maxWidth),
+                            child: tile,
+                          );
+                          return (!locked && stats.isPremiumCached)
+                              ? CupertinoContextMenu(
+                                  actions: _contextActions(context, preset),
+                                  child: constrained,
+                                )
+                              : constrained;
+                        },
                       ),
                     );
                   }).toList(),
@@ -95,7 +109,13 @@ class PresetsScreen extends StatelessWidget {
                     color: CupertinoColors.systemBlue,
                     borderRadius: BorderRadius.circular(16),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Text(loc.t('create_preset')),
+                    child: Text(
+                      loc.t('create_preset'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                   ],
                 );
@@ -140,6 +160,36 @@ class PresetsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<Widget> _contextActions(BuildContext context, FocusPreset preset) {
+    final loc = AppLocalizations.of(context);
+    return [
+      CupertinoContextMenuAction(
+        onPressed: () {
+          Navigator.of(context).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => EditPresetScreen(
+                presetsController: presetsController,
+                preset: preset,
+                createFromPreset: preset.isBuiltIn,
+              ),
+            ),
+          );
+        },
+        child: Text(loc.t('edit_preset')),
+      ),
+      if (preset.isPremium)
+        CupertinoContextMenuAction(
+          isDestructiveAction: true,
+          onPressed: () async {
+            Navigator.of(context).pop();
+            await presetsController.deletePreset(preset.id);
+          },
+          child: Text(loc.t('delete_preset')),
+        ),
+    ];
   }
 
   void _openPaywall(BuildContext context) {

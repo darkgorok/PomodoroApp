@@ -13,7 +13,6 @@ import '../model/presets.dart';
 import '../sound/white_noise_controller.dart';
 import '../../reminders/reminder_controller.dart';
 import '../../reminders/reminder_settings_screen.dart';
-import 'edit_preset_screen.dart';
 import 'paywall_screen.dart';
 import 'upgrade_screen.dart';
 
@@ -88,7 +87,6 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
               children: [
                 _TimerAppBar(
                   title: _titleForPreset(context),
-                  onBellTap: () => _openReminders(context),
                 ),
                 Expanded(
                   child: AnimatedBuilder(
@@ -107,16 +105,16 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              _PresetPill(
-                                label:
-                                    '${AppLocalizations.of(context).t('preset')}: ${_controller.preset.displayName(AppLocalizations.of(context))}',
-                                onTap: () => _openPresetSelector(context),
-                              ),
-                              const SizedBox(height: 8),
                               _SoundButton(
                                 isPremium: widget.stats.isPremiumCached,
                                 label: AppLocalizations.of(context).t('sound_button'),
                                 onTap: () => _openSoundPicker(context),
+                              ),
+                              const SizedBox(height: 8),
+                              _PresetPill(
+                                label:
+                                    '${AppLocalizations.of(context).t('preset')}: ${_controller.preset.displayName(AppLocalizations.of(context))}',
+                                onTap: () => _openPresetSelector(context),
                               ),
                               const SizedBox(height: 8),
                               _StatusPill(text: statusText),
@@ -234,7 +232,7 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   Future<void> _openSoundPicker(BuildContext context) async {
     if (!widget.stats.isPremiumCached) {
-      _openPaywall(context);
+      _openUpgrade(context);
       return;
     }
 
@@ -270,7 +268,9 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
                       title: _soundTitle(loc, sound.id),
                       selected: selected,
                       playing: selected && _noise.isPlaying,
-                      onTap: () => _noise.play(sound.id),
+                      onTap: () async {
+                        await _noise.play(sound.id);
+                      },
                     );
                   }).toList(),
                   const SizedBox(height: 12),
@@ -304,58 +304,64 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   Future<void> _openPresetSelector(BuildContext context) async {
     final loc = AppLocalizations.of(context);
-    await showModalBottomSheet<void>(
+    await showCupertinoModalPopup<void>(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (context) {
         return AnimatedBuilder(
           animation: widget.presetsController,
           builder: (context, _) {
             final presets = widget.presetsController.presets;
-            return SafeArea(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                shrinkWrap: true,
-                itemCount: presets.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final preset = presets[index];
-                  final locked = widget.presetsController.isLocked(preset);
-                  final selected = preset.id == _controller.preset.id;
-                  return ListTile(
-                    tileColor: selected ? const Color(0xFFF1F2FD) : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    title: Text(preset.displayName(loc)),
-                    subtitle: Text(preset.displaySubtitle(loc)),
-                    trailing: locked
-                        ? const Icon(CupertinoIcons.lock_fill,
-                            size: 18, color: Color(0xFF9AA0C8))
-                        : selected
-                            ? const Icon(CupertinoIcons.check_mark_circled_solid,
-                                color: Color(0xFF4B55C9))
-                            : const Icon(CupertinoIcons.chevron_right,
-                                color: Color(0xFF9AA0C8)),
-                    onTap: () async {
-                      if (locked) {
-                        _openPaywall(context);
-                        return;
-                      }
-                      if (_controller.isRunning) {
-                        final shouldReset = await _confirmPresetReset(context);
-                        if (!shouldReset) return;
-                      }
-                      await _applyPreset(preset);
-                      if (mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  );
-                },
+            return CupertinoActionSheet(
+              title: Text(loc.t('presets')),
+              actions: presets.map((preset) {
+                final locked = widget.presetsController.isLocked(preset);
+                final selected = preset.id == _controller.preset.id;
+                final label = '${preset.displayName(loc)} • ${preset.displaySubtitle(loc)}';
+                return CupertinoActionSheetAction(
+                  onPressed: () async {
+                    if (locked) {
+                      Navigator.of(context).pop();
+                      _openPaywall(context);
+                      return;
+                    }
+                    if (_controller.isRunning) {
+                      final shouldReset = await _confirmPresetReset(context);
+                      if (!shouldReset) return;
+                    }
+                    await _applyPreset(preset);
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  isDefaultAction: selected,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            color: locked
+                                ? const Color(0xFF9AA0C8)
+                                : CupertinoColors.activeBlue,
+                            fontWeight:
+                                selected ? FontWeight.w600 : FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      if (locked)
+                        const Icon(CupertinoIcons.lock_fill,
+                            size: 16, color: Color(0xFF9AA0C8))
+                      else if (selected)
+                        const Icon(CupertinoIcons.check_mark,
+                            size: 16, color: Color(0xFF4B55C9)),
+                    ],
+                  ),
+                );
+              }).toList(),
+              cancelButton: CupertinoActionSheetAction(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(loc.t('cancel')),
               ),
             );
           },
@@ -428,30 +434,79 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 
   Future<void> _openCustomize() async {
     if (!widget.stats.isPremiumCached) {
-      _openPaywall(context);
+      _openUpgrade(context);
       return;
     }
     final loc = AppLocalizations.of(context);
-    final preset = _controller.preset.copyWith(
-      name: _controller.preset.displayName(loc),
+    final isPomodoro = _controller.preset.breakSeconds > 0;
+    int focusMinutes = (_controller.focusSeconds / 60).round();
+    int breakMinutes = (_controller.breakSeconds / 60).round();
+
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (context) {
+        return Container(
+          height: isPomodoro ? 330 : 280,
+          color: Colors.white,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(loc.t('cancel')),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        final focusSeconds = focusMinutes.clamp(1, 300) * 60;
+                        final breakSeconds =
+                            isPomodoro ? breakMinutes.clamp(0, 300) * 60 : 0;
+                        _controller.updateDurations(
+                          focusSeconds: focusSeconds,
+                          breakSeconds: breakSeconds,
+                        );
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(loc.t('save')),
+                    ),
+                  ],
+                ),
+              ),
+              if (isPomodoro)
+                Row(
+                  children: [
+                    Expanded(
+                      child: _MinutesPickerColumn(
+                        title: loc.t('focus_minutes'),
+                        initialMinutes: focusMinutes,
+                        onChanged: (value) => focusMinutes = value,
+                      ),
+                    ),
+                    Expanded(
+                      child: _MinutesPickerColumn(
+                        title: loc.t('break_minutes'),
+                        initialMinutes: breakMinutes,
+                        onChanged: (value) => breakMinutes = value,
+                      ),
+                    ),
+                  ],
+                )
+              else
+                _MinutesPickerColumn(
+                  title: loc.t('focus_minutes'),
+                  initialMinutes: focusMinutes,
+                  onChanged: (value) => focusMinutes = value,
+                ),
+            ],
+          ),
+        );
+      },
     );
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => EditPresetScreen(
-          presetsController: widget.presetsController,
-          preset: preset,
-          createFromPreset: preset.isBuiltIn,
-        ),
-      ),
-    );
-    if (!mounted) return;
-    final updated = widget.presetsController.selectedPreset;
-    if (updated.id != _controller.preset.id ||
-        updated.focusSeconds != _controller.focusSeconds ||
-        updated.breakSeconds != _controller.breakSeconds ||
-        updated.name != _controller.preset.name) {
-      _controller.applyPreset(updated);
-    }
   }
 
   void _openPaywall(BuildContext context) {
@@ -522,10 +577,9 @@ class _TimerScreenState extends State<TimerScreen> with WidgetsBindingObserver {
 }
 
 class _TimerAppBar extends StatelessWidget {
-  const _TimerAppBar({required this.title, required this.onBellTap});
+  const _TimerAppBar({required this.title});
 
   final String title;
-  final VoidCallback onBellTap;
 
   @override
   Widget build(BuildContext context) {
@@ -548,10 +602,7 @@ class _TimerAppBar extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
-            onPressed: onBellTap,
-            icon: const Icon(CupertinoIcons.bell, color: Colors.white70),
-          ),
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -594,7 +645,7 @@ class _PresetPill extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.12),
           borderRadius: BorderRadius.circular(20),
@@ -603,19 +654,19 @@ class _PresetPill extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(CupertinoIcons.slider_horizontal_3,
-                color: Colors.white70, size: 14),
+                color: Colors.white70, size: 16),
             const SizedBox(width: 6),
             Text(
               label,
               style: const TextStyle(
                 color: Colors.white70,
-                fontSize: 12,
+                fontSize: 13,
               ),
             ),
             const SizedBox(width: 4),
             const Icon(
               CupertinoIcons.chevron_down,
-              size: 12,
+              size: 13,
               color: Colors.white70,
             ),
           ],
@@ -641,12 +692,14 @@ class _SoundButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        constraints: const BoxConstraints(maxWidth: 240),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.12),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(CupertinoIcons.headphones, color: Colors.white70, size: 16),
             const SizedBox(width: 6),
@@ -706,6 +759,35 @@ class _SoundTile extends StatelessWidget {
             const SizedBox(width: 10),
             Text(title, style: Theme.of(context).textTheme.bodyLarge),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MinutesPickerColumn extends StatelessWidget {
+  const _MinutesPickerColumn({
+    required this.title,
+    required this.initialMinutes,
+    required this.onChanged,
+  });
+
+  final String title;
+  final int initialMinutes;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final clamped = initialMinutes.clamp(1, 300);
+    return SizedBox(
+      height: 200,
+      child: CupertinoPicker(
+        scrollController: FixedExtentScrollController(initialItem: clamped - 1),
+        itemExtent: 36,
+        onSelectedItemChanged: (index) => onChanged(index + 1),
+        children: List.generate(
+          300,
+          (index) => Center(child: Text((index + 1).toString())),
         ),
       ),
     );

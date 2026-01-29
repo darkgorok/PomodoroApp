@@ -10,7 +10,6 @@ import '../../settings/theme_controller.dart';
 import '../controller/presets_controller.dart';
 import '../controller/stats_controller.dart';
 import '../model/presets.dart';
-import '../components/preset_tile.dart';
 import '../components/session_card.dart';
 import '../../../core/ui/app_background.dart';
 import 'paywall_screen.dart';
@@ -77,115 +76,81 @@ class _HomeScreenState extends State<HomeScreen> {
               return ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
-                _SummaryCard(
-                  focusedMinutes: widget.stats.todayFocusedMinutes,
-                  sessionsToday: widget.stats.sessionsToday,
-                  currentStreak: widget.stats.currentStreak,
-                  title: loc.t('today_focused'),
-                  sessionsLabel: loc.t('sessions_today'),
-                  streakLabel: loc.t('current_streak'),
-                  daysLabel: loc.t('days_short'),
-                  backgroundImage: 'assets/ButtonBackgroundDarkBlue.png',
-                  backgroundScale: const Offset(1.1, 1),
-                ),
-                const SizedBox(height: 16),
-                SessionCard(
-                  title: loc.t('start_now'),
-                  subtitle: loc.t('start_now_subtitle'),
-                  icon: Icons.play_arrow_rounded,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF5B68FF), Color(0xFF8FA0FF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  _SummaryCard(
+                    focusedMinutes: widget.stats.todayFocusedMinutes,
+                    sessionsToday: widget.stats.sessionsToday,
+                    currentStreak: widget.stats.currentStreak,
+                    title: loc.t('today_focused'),
+                    sessionsLabel: loc.t('sessions_today'),
+                    streakLabel: loc.t('current_streak'),
+                    daysLabel: loc.t('days_short'),
+                    backgroundImage: 'assets/ButtonBackgroundDarkBlue.png',
+                    backgroundScale: const Offset(1.1, 1),
                   ),
-                  backgroundImage: 'assets/ButtonBackground.png',
-                  backgroundScale: const Offset(1.1, 1),
-                  onTap: () => _openTimer(_findPreset(FocusPreset.idStartNow)),
-                ),
-                const SizedBox(height: 12),
-                SessionCard(
-                  title: loc.t('pomodoro'),
-                  subtitle: loc.t('pomodoro_subtitle'),
-                  icon: Icons.timer_outlined,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF8A7A), Color(0xFFFFB08A)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  const SizedBox(height: 16),
+                  SessionCard(
+                    title: loc.t('start_now'),
+                    subtitle: loc.t('start_now_subtitle'),
+                    icon: Icons.play_arrow_rounded,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF5B68FF), Color(0xFF8FA0FF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    backgroundImage: 'assets/ButtonBackground.png',
+                    backgroundScale: const Offset(1.1, 1),
+                    onTap: () => _openTimer(_findPreset(FocusPreset.idStartNow)),
                   ),
-                  backgroundImage: 'assets/PomodoroBtnBackground.png',
-                  backgroundScale: const Offset(1.1, 1),
-                  onTap: () => _openTimer(_findPreset(FocusPreset.idPomodoro)),
-                ),
-                const SizedBox(height: 12),
-                SessionCard(
-                  title: loc.t('your_progress'),
-                  subtitle: loc.t('stats_streaks_subtitle'),
-                  icon: Icons.show_chart_rounded,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF5B68FF), Color(0xFF8FA0FF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  backgroundImage: 'assets/ButtonBackground.png',
-                  backgroundScale: const Offset(1.1, 1),
-                  onTap: _openStats,
-                ),
-                if (widget.stats.isPremiumCached) ...[
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        loc.t('presets'),
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: _openPresets,
-                        child: Text(loc.t('see_all')),
-                      ),
-                    ],
-                  ),
-                  PresetTile(
-                    title: _findPreset(FocusPreset.idPomodoro).displayName(loc),
-                    subtitle:
-                        _findPreset(FocusPreset.idPomodoro).displaySubtitle(loc),
-                    locked: false,
+                  const SizedBox(height: 12),
+                  SessionCard(
+                    title: loc.t('pomodoro'),
+                    subtitle: loc.t('pomodoro_subtitle'),
+                    icon: Icons.timer_outlined,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF8A7A), Color(0xFFFFB08A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    backgroundImage: 'assets/PomodoroBtnBackground.png',
+                    backgroundScale: const Offset(1.1, 1),
                     onTap: () => _openTimer(_findPreset(FocusPreset.idPomodoro)),
                   ),
                   const SizedBox(height: 12),
-                  PresetTile(
-                    title: _findPreset(FocusPreset.idDeepWork).displayName(loc),
-                    subtitle:
-                        _findPreset(FocusPreset.idDeepWork).displaySubtitle(loc),
-                    locked: widget.presetsController.isLocked(
-                        _findPreset(FocusPreset.idDeepWork)),
-                    onTap: () {
-                      final preset = _findPreset(FocusPreset.idDeepWork);
-                      if (widget.presetsController.isLocked(preset)) {
-                        _openPaywall();
-                      } else {
-                        _openTimer(preset);
-                      }
-                    },
+                  SessionCard(
+                    title: loc.t('your_progress'),
+                    subtitle: loc.t('stats_streaks_subtitle'),
+                    icon: Icons.show_chart_rounded,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF5B68FF), Color(0xFF8FA0FF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    backgroundImage: 'assets/ButtonBackground.png',
+                    backgroundScale: const Offset(1.1, 1),
+                    onTap: _openStats,
                   ),
-                ],
-                const SizedBox(height: 12),
-                _TipCard(
-                  title: loc.t('small_rule'),
-                  text: loc.t('small_rule_text'),
+                  const SizedBox(height: 12),
+                SessionCard(
+                  title: loc.t('presets'),
+                  subtitle: loc.t('presets_home_subtitle'),
+                  icon: Icons.layers_rounded,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF6F78E8), Color(0xFF8FA0FF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   backgroundImage: 'assets/ButtonBackgroundGrey.png',
                   backgroundScale: const Offset(1.1, 1),
+                  onTap: _openPresets,
                 ),
-                const SizedBox(height: 12),
-                _LockedCard(
-                  title: loc.t('customize'),
-                  subtitle: loc.t('customize_locked_subtitle'),
-                  backgroundImage: 'assets/ButtonBackgroundDarkGrey.png',
-                  backgroundScale: const Offset(1.1, 1),
-                  onTap: _openUpgrade,
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  _TipCard(
+                    title: loc.t('small_rule'),
+                    text: loc.t('small_rule_text'),
+                    backgroundImage: 'assets/ButtonBackgroundGrey.png',
+                    backgroundScale: const Offset(1.1, 1),
+                  ),
+                ],
               );
             },
           ),
@@ -403,8 +368,14 @@ class _SummaryCard extends StatelessWidget {
                         ),
                         if (currentStreak > 0) ...[
                           const SizedBox(width: 10),
+                          const Icon(
+                            Icons.local_fire_department,
+                            size: 14,
+                            color: Colors.white70,
+                          ),
+                          const SizedBox(width: 4),
                           Text(
-                            '?? $streakLabel: $currentStreak $daysLabel',
+                            '$streakLabel: $currentStreak $daysLabel',
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 12,

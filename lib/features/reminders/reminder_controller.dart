@@ -34,6 +34,12 @@ class ReminderController extends ChangeNotifier {
     await scheduleAll();
   }
 
+  Future<void> requestPermissionsOnFirstOpen() async {
+    if (ReminderPrefs.getPermissionRequested()) return;
+    await repo.requestPermissions();
+    await ReminderPrefs.setPermissionRequested(true);
+  }
+
   ReminderSettings _settings() => ReminderSettings(
         premiumEnabled: stats.isPremiumCached,
         dailyEnabled: dailyEnabled,

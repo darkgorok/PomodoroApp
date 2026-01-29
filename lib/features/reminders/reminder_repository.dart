@@ -30,6 +30,13 @@ class ReminderRepository {
     _ready = true;
   }
 
+  Future<void> requestPermissions() async {
+    if (!_ready) return;
+    final ios = _notifications
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    await ios?.requestPermissions(alert: true, badge: true, sound: true);
+  }
+
   Future<void> cancelAll() async {
     if (!_ready) return;
     await _notifications.cancelAll();
@@ -230,6 +237,7 @@ class ReminderPrefs {
   static const _quietEnabledKey = 'quiet_hours_enabled';
   static const _quietStartKey = 'quiet_hours_start';
   static const _quietEndKey = 'quiet_hours_end';
+  static const _permissionRequestedKey = 'reminder_permission_requested';
 
   static bool getDailyEnabled() => Prefs.getBool(_dailyEnabledKey) ?? false;
   static int getDailyTime() => Prefs.getInt(_dailyTimeKey) ?? 540;
@@ -248,6 +256,8 @@ class ReminderPrefs {
   static bool getQuietEnabled() => Prefs.getBool(_quietEnabledKey) ?? false;
   static int getQuietStart() => Prefs.getInt(_quietStartKey) ?? 1320;
   static int getQuietEnd() => Prefs.getInt(_quietEndKey) ?? 420;
+  static bool getPermissionRequested() =>
+      Prefs.getBool(_permissionRequestedKey) ?? false;
 
   static Future<void> setDailyEnabled(bool value) =>
       Prefs.setBool(_dailyEnabledKey, value);
@@ -272,4 +282,6 @@ class ReminderPrefs {
       Prefs.setInt(_quietStartKey, value);
   static Future<void> setQuietEnd(int value) =>
       Prefs.setInt(_quietEndKey, value);
+  static Future<void> setPermissionRequested(bool value) =>
+      Prefs.setBool(_permissionRequestedKey, value);
 }

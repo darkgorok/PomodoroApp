@@ -1,5 +1,10 @@
-﻿import 'package:just_audio/just_audio.dart';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:path_provider/path_provider.dart';
+
 import '../../../core/storage/prefs.dart';
 
 class SoundOption {
@@ -26,11 +31,13 @@ class WhiteNoiseController extends ChangeNotifier {
   ];
 
   final AudioPlayer _player;
+  final Map<String, String> _cachedFiles = {};
 
   String? selectedSoundId;
   double volume = 0.7;
   bool autoPlay = false;
   bool isPlaying = false;
+  String? lastError;
 
   Future<void> loadPrefs() async {
     selectedSoundId = Prefs.getSelectedSoundId();
@@ -47,16 +54,26 @@ class WhiteNoiseController extends ChangeNotifier {
     return sounds.firstWhere((s) => s.id == id, orElse: () => sounds.first);
   }
 
-  Future<void> play(String soundId) async {
+  Future<bool> play(String soundId) async {
     final sound = sounds.firstWhere((s) => s.id == soundId);
     selectedSoundId = soundId;
     await Prefs.setSelectedSoundId(soundId);
-    await _player.setAudioSource(AudioSource.asset(sound.assetPath));
-    await _player.setLoopMode(LoopMode.one);
-    await _player.setVolume(volume);
-    await _player.play();
-    isPlaying = true;
-    notifyListeners();
+    try {
+      final filePath = await _ensureAssetFile(sound.assetPath, sound.id);
+      await _player.setAudioSource(AudioSource.file(filePath));
+      await _player.setLoopMode(LoopMode.one);
+      await _player.setVolume(volume);
+      await _player.play();
+      isPlaying = true;
+      lastError = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      isPlaying = false;
+      lastError = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<void> stop() async {
@@ -91,6 +108,22 @@ class WhiteNoiseController extends ChangeNotifier {
 
   Future<void> handleFocusEnd() async {
     await stop();
+  }
+
+  Future<String> _ensureAssetFile(String assetPath, String id) async {
+    final cached = _cachedFiles[assetPath];
+    if (cached != null && File(cached).existsSync()) {
+      return cached;
+    }
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/sound_$id.mp3');
+    if (!file.existsSync()) {
+      final data = await rootBundle.load(assetPath);
+      final bytes = data.buffer.asUint8List();
+      await file.writeAsBytes(bytes, flush: true);
+    }
+    _cachedFiles[assetPath] = file.path;
+    return file.path;
   }
 
   @override

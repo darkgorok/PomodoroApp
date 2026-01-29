@@ -169,25 +169,25 @@ class App extends StatelessWidget {
               headlineMedium: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: Color(0xFF1E2138),
               ),
               titleLarge: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Color(0xFF1E2138),
               ),
               titleMedium: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Color(0xFF1E2138),
               ),
               bodyLarge: const TextStyle(
                 fontSize: 15,
-                color: Color(0xFFE0E1F5),
+                color: Color(0xFF4B4E6D),
               ),
               bodyMedium: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFFB8B9D9),
+                color: Color(0xFF6B6F8C),
               ),
             ),
           ),

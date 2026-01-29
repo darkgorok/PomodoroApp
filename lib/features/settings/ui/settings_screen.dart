@@ -134,20 +134,12 @@ class _SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: const Color(0xFFF0F1F6),
       elevation: 0,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.hardEdge,
       child: Ink(
-        decoration: const BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x14000000),
-              blurRadius: 10,
-              offset: Offset(0, 6),
-            ),
-          ],
-        ),
+        decoration: const BoxDecoration(),
         child: child,
       ),
     );

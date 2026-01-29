@@ -1,4 +1,4 @@
-# pomodoro_app
+# Lumo
 
 A new Flutter project.
 

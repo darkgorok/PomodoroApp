@@ -8,6 +8,9 @@ class PresetTile extends StatelessWidget {
     required this.onTap,
     this.onLongPress,
     this.locked = false,
+    this.icon = Icons.tune_rounded,
+    this.iconColor = const Color(0xFF6C6DDA),
+    this.iconBackground = const Color(0xFFEDEEFE),
   });
 
   final String title;
@@ -15,6 +18,10 @@ class PresetTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final bool locked;
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBackground;
+  final String _backgroundImage = 'assets/ButtonBackgroundGrey.png';
 
   @override
   Widget build(BuildContext context) {
@@ -36,39 +43,64 @@ class PresetTile extends StatelessWidget {
               ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              Positioned.fill(
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.diagonal3Values(1.1, 1, 1),
+                  child: Image.asset(
+                    _backgroundImage,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: iconBackground,
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1E2138),
-                        ),
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E2138),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            subtitle,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF6B6F8C),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B6F8C),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    if (locked)
+                      const Icon(Icons.lock_rounded, color: Color(0xFF9AA0C8))
+                    else
+                      const Icon(Icons.chevron_right, color: Color(0xFF9AA0C8)),
+                  ],
                 ),
-                if (locked)
-                  const Icon(Icons.lock_rounded, color: Color(0xFF9AA0C8))
-                else
-                  const Icon(Icons.chevron_right, color: Color(0xFF9AA0C8)),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

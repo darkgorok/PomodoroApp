@@ -27,7 +27,6 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
   late final TextEditingController _nameController;
   late int _focusMinutes;
   late int _breakMinutes;
-  late bool _autoStartBreak;
   late bool _autoStartNextFocus;
 
   bool get _isEditing => widget.preset != null && !widget.createFromPreset;
@@ -41,7 +40,6 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
     );
     _focusMinutes = ((preset?.focusSeconds ?? 1500) / 60).round();
     _breakMinutes = ((preset?.breakSeconds ?? 300) / 60).round();
-    _autoStartBreak = preset?.autoStartBreak ?? true;
     _autoStartNextFocus = preset?.autoStartNextFocus ?? false;
   }
 
@@ -75,23 +73,34 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: [
-              CupertinoFormSection.insetGrouped(
-                backgroundColor: Colors.transparent,
-                margin: EdgeInsets.zero,
-                children: [
-                  CupertinoFormRow(
-                    prefix: Text(loc.t('preset_name')),
-                    child: CupertinoTextField(
-                      controller: _nameController,
-                      placeholder: loc.t('preset_name_placeholder'),
-                      textAlign: TextAlign.right,
+              _CardBlock(
+                child: Column(
+                  children: [
+                    _FieldRow(
+                      title: loc.t('preset_name'),
+                      child: CupertinoTextField(
+                        controller: _nameController,
+                        placeholder: loc.t('preset_name_placeholder'),
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(color: Colors.black),
+                        placeholderStyle: const TextStyle(
+                          color: Color(0xFF6B6F8C),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
                     ),
-                  ),
-                  CupertinoFormRow(
-                    prefix: Text(loc.t('focus_minutes')),
-                    child: CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => _pickMinutes(
+                    _DividerLine(),
+                    _PickerRow(
+                      title: loc.t('focus_minutes'),
+                      value: '$_focusMinutes',
+                      onTap: () => _pickMinutes(
                         context: context,
                         title: loc.t('focus_minutes'),
                         initial: _focusMinutes,
@@ -99,14 +108,12 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
                         min: 1,
                         max: 240,
                       ),
-                      child: Text('$_focusMinutes'),
                     ),
-                  ),
-                  CupertinoFormRow(
-                    prefix: Text(loc.t('break_minutes')),
-                    child: CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => _pickMinutes(
+                    _DividerLine(),
+                    _PickerRow(
+                      title: loc.t('break_minutes'),
+                      value: '$_breakMinutes',
+                      onTap: () => _pickMinutes(
                         context: context,
                         title: loc.t('break_minutes'),
                         initial: _breakMinutes,
@@ -114,36 +121,30 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
                         min: 0,
                         max: 120,
                       ),
-                      child: Text('$_breakMinutes'),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              CupertinoFormSection.insetGrouped(
-                backgroundColor: Colors.transparent,
-                margin: const EdgeInsets.only(top: 8),
-                children: [
-                  CupertinoFormRow(
-                    prefix: Text(loc.t('auto_start_break')),
-                    child: CupertinoSwitch(
-                      value: _autoStartBreak,
-                      onChanged: (value) => setState(() => _autoStartBreak = value),
-                    ),
-                  ),
-                  CupertinoFormRow(
-                    prefix: Text(loc.t('auto_start_next_focus')),
-                    child: CupertinoSwitch(
+              const SizedBox(height: 12),
+              _CardBlock(
+                child: Column(
+                  children: [
+                    _SwitchRow(
+                      title: loc.t('auto_start_next_focus'),
                       value: _autoStartNextFocus,
                       onChanged: (value) => setState(() => _autoStartNextFocus = value),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               CupertinoButton.filled(
                 onPressed: _savePreset,
                 borderRadius: BorderRadius.circular(16),
-                child: Text(loc.t('save')),
+                child: Text(
+                  loc.t('save'),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ),
               if (_isEditing)
                 Padding(
@@ -184,9 +185,8 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: () {
@@ -209,7 +209,12 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
                   },
                   children: List.generate(
                     max - min + 1,
-                    (index) => Center(child: Text('${min + index}')),
+                    (index) => Center(
+                      child: Text(
+                        '${min + index}',
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -236,7 +241,7 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
       breakSeconds: _breakMinutes * 60,
       isBuiltIn: false,
       isPremium: true,
-      autoStartBreak: _autoStartBreak,
+      autoStartBreak: true,
       autoStartNextFocus: _autoStartNextFocus,
       whiteNoiseSoundId: existing?.whiteNoiseSoundId,
       reminderProfileId: existing?.reminderProfileId,
@@ -260,5 +265,142 @@ class _EditPresetScreenState extends State<EditPresetScreen> {
     if (mounted) {
       Navigator.of(context).pop();
     }
+  }
+}
+
+class _CardBlock extends StatelessWidget {
+  const _CardBlock({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F1F6),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _DividerLine extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Divider(height: 1, thickness: 1, color: Color(0xFFE2E4F0)),
+    );
+  }
+}
+
+class _FieldRow extends StatelessWidget {
+  const _FieldRow({required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1E2138),
+            ),
+          ),
+        ),
+        SizedBox(width: 210, child: child),
+      ],
+    );
+  }
+}
+
+class _PickerRow extends StatelessWidget {
+  const _PickerRow({
+    required this.title,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String title;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E2138),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1E2138),
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(
+                CupertinoIcons.chevron_right,
+                size: 16,
+                color: Color(0xFF9AA0C8),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SwitchRow extends StatelessWidget {
+  const _SwitchRow({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String title;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1E2138),
+            ),
+          ),
+        ),
+        CupertinoSwitch(value: value, onChanged: onChanged),
+      ],
+    );
   }
 }

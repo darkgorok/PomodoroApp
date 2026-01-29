@@ -277,7 +277,10 @@ class _WeeklyChart extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     day.date.substring(8, 10),
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF1E2138),
+                    ),
                   ),
                 ],
               ),

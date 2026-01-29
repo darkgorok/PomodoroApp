@@ -14,7 +14,15 @@ class UpgradeScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).t('upgrade')),
+        foregroundColor: Colors.white,
+        title: Text(
+          AppLocalizations.of(context).t('upgrade'),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
       ),
       body: BackSwipe(
         onBack: () => Navigator.of(context).maybePop(),
@@ -183,9 +191,22 @@ class _PerkTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E2138),
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF6B6F8C),
+                  ),
+                ),
               ],
             ),
           ),
